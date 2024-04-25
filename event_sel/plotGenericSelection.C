@@ -49,6 +49,85 @@ TLatex tL;
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
 TFile fPurity("testPurity.root");
+TFile fBad("testNoMinerva.root");
+TFile fMinerva("testMinerva.root");
+
+TH1D* backtrackEl=(TH1D*)fPurity.Get("recoBacktrackElAr");
+backtrackEl->GetXaxis()->SetTitle("E_{#mu} [GeV]");
+backtrackEl->GetYaxis()->SetTitle("Number of Interactions");
+backtrackEl->SetTitle("Selected Interactions");
+backtrackEl->Draw("E0 HIST");
+    tL.SetNDC();
+    tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
+c1.Print("backtrackEl.png"); c1.Print("backtrackEl.pdf");
+
+TH1D* backtrackCosl=(TH1D*)fPurity.Get("recoBacktrackCoslAr");
+backtrackCosl->GetXaxis()->SetTitle("cos(#theta_{#mu})");
+backtrackCosl->GetYaxis()->SetTitle("Number of Interactions");
+backtrackCosl->SetTitle("Selected Interactions");
+backtrackCosl->GetXaxis()->SetRangeUser(0.85,1);
+backtrackCosl->Draw("E0 HIST");
+    tL.SetNDC();
+    tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
+c1.Print("backtrackCosl.png"); c1.Print("backtrackCosl.pdf");
+
+
+
+TH2D* confusionMatrix=(TH2D*)fPurity.Get("confusionMatrix");
+confusionMatrix->SetTitle("Confusion Matrix for Particle ID");
+confusionMatrix->GetXaxis()->SetTitle("Reco. Particle ID");
+confusionMatrix->GetYaxis()->SetTitle("True Particle ID");
+std::vector<string> labels={"Muon", "Proton","Pion","Other"};
+for (int i=0; i<4; i++){
+std::cout<<labels.at(i)<<std::endl;
+confusionMatrix->GetXaxis()->SetBinLabel(i+1,labels.at(i).c_str());
+confusionMatrix->GetYaxis()->SetBinLabel(i+1,labels.at(i).c_str());
+double integral=confusionMatrix->Integral(i+1, i+1, 0,7);
+for (int j=0; j<4; j++){
+confusionMatrix->SetBinContent(i+1,j+1,confusionMatrix->GetBinContent(i+1,j+1)/integral);
+}
+
+}
+
+confusionMatrix->SetMarkerSize(2.0);
+confusionMatrix->GetXaxis()->CenterTitle();
+confusionMatrix->GetYaxis()->CenterTitle();
+confusionMatrix->GetYaxis()->LabelsOption("v");
+gPad->SetLeftMargin(0.18);
+gPad->SetRightMargin(0.15);
+confusionMatrix->GetYaxis()->SetTitleOffset(1.5);
+gStyle->SetPaintTextFormat("1.3f");
+confusionMatrix->Draw("COLZ TEXT");
+c1.Print("confusionMatrix.pdg");
+c1.Print("confusionMatrix.png");
+
+TH2D* responseMatrix=(TH2D*)fPurity.Get("responseMult");
+responseMatrix->SetTitle("Response Matrix for Track Mult.");
+responseMatrix->GetXaxis()->SetTitle("Reco. Charged Part.");
+responseMatrix->GetYaxis()->SetTitle("True Charged Part.");
+
+for (int i=0; i<20; i++){
+double integral=responseMatrix->Integral(0,20, i+1,i+1);
+for (int j=0; j<20; j++){
+responseMatrix->SetBinContent(j+1,i+1,responseMatrix->GetBinContent(j+1,i+1)/integral);
+}
+
+}
+
+responseMatrix->SetMarkerSize(2.0);
+responseMatrix->GetXaxis()->CenterTitle();
+responseMatrix->GetYaxis()->CenterTitle();
+responseMatrix->GetXaxis()->SetRangeUser(1,8);
+responseMatrix->GetYaxis()->SetRangeUser(1,8);
+//responseMatrix->GetYaxis()->LabelsOption("v");
+gPad->SetLeftMargin(0.18);
+gPad->SetRightMargin(0.15);
+responseMatrix->GetYaxis()->SetTitleOffset(1.2);
+gStyle->SetPaintTextFormat("1.3f");
+responseMatrix->Draw("COLZ TEXT");
+c1.Print("responseMatrix.pdg");
+c1.Print("responseMatrix.png");
+
 
 TH1D* true_multTrkOnly=(TH1D*)fPurity.Get("true_multTrkOnly");
 true_multTrkOnly->GetXaxis()->CenterTitle(); true_multTrkOnly->GetYaxis()->CenterTitle();
@@ -175,6 +254,8 @@ h1d_track->Add(track_multSec);
 
 
 
+
+
 TH1D* track_multGood=(TH1D*)fPurity.Get("track_multGood");
 track_mult->GetXaxis()->CenterTitle();
 track_mult->GetXaxis()->SetTitle("Number of Reconstructed Tracks");
@@ -194,7 +275,7 @@ track_mult->Draw("E0 HIST");
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
 c1.Print("track_mult.png"); c1.Print("track_mult.pdf");
-
+track_mult->GetYaxis()->SetRangeUser(0,1000);
 track_mult->SetLineWidth(0); track_mult->GetXaxis()->SetRangeUser(0,10);
 track_mult->Draw("HIST");
 h1d_track->Draw("SAME");
@@ -209,6 +290,151 @@ track_multGood->Draw("E0 HIST");
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
 c1.Print("track_multGood.png"); c1.Print("track_multGood.pdf");
+
+
+track_mult->SetLineWidth(0); track_mult->GetXaxis()->SetRangeUser(0,10); track_mult->SetTitle("Scaled to 1 Day");
+track_mult->Scale(24.0/82.0);
+track_multQE->Scale(24.0/82.0);
+track_multMEC->Scale(24.0/82.0);
+track_multDIS->Scale(24.0/82.0);
+track_multRES->Scale(24.0/82.0);
+track_multCOH->Scale(24.0/82.0);
+track_multNC->Scale(24.0/82.0);
+track_multRock->Scale(24.0/82.0);
+track_multSec->Scale(24.0/82.0);
+
+track_multQE->SetFillColor(kRed); track_multQE->SetLineColor(kRed); track_multQE->SetLineWidth(0);
+
+track_multMEC->SetFillColor(kBlue); track_multMEC->SetLineColor(kBlue); track_multMEC->SetLineWidth(0);
+
+track_multDIS->SetFillColor(kYellow); track_multDIS->SetLineColor(kYellow); 
+
+track_multRES->SetFillColor(kGreen+2); track_multRES->SetLineColor(kGreen+2); 
+
+track_multNC->SetFillColor(kGray); track_multNC->SetLineColor(kGray);
+
+track_multCOH->SetFillColor(kCyan); track_multCOH->SetLineColor(kCyan);
+
+track_multRock->SetFillColor(kViolet); track_multRock->SetLineColor(kViolet);
+
+track_multSec->SetFillColor(kBlack); track_multSec->SetLineColor(kBlack);
+THStack* h1d_track2=new THStack("hs2","hs2");
+h1d_track2->Add(track_multQE);
+h1d_track2->Add(track_multMEC);
+h1d_track2->Add(track_multDIS);
+h1d_track2->Add(track_multRES);
+h1d_track2->Add(track_multCOH);
+h1d_track2->Add(track_multNC);
+h1d_track2->Add(track_multRock);
+h1d_track2->Add(track_multSec);
+std::cout<<track_multQE->GetMaximum()<<std::endl;
+
+track_mult->Draw("HIST");
+h1d_track2->Draw("SAME HIST");
+lTrack->Draw("SAME");
+    tL.SetNDC();
+    tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
+c1.Print("track_multStack1Day.png"); c1.Print("track_multStack1Day.pdf");
+track_mult->SetLineWidth(track_multGood->GetLineWidth());
+
+track_mult->SetLineWidth(0); track_mult->GetXaxis()->SetRangeUser(0,10); track_mult->SetTitle("Scaled to 10 Days");
+track_mult->Scale(2.927*82.0/24.0);
+track_multQE->Scale(2.927*82.0/24.0);
+track_multMEC->Scale(2.927*82.0/24.0);
+track_multDIS->Scale(2.9277*82.0/24.0);
+track_multRES->Scale(2.927*82.0/24.0);
+track_multCOH->Scale(2.927*82.0/24.0);
+track_multNC->Scale(2.927*82.0/24.0);
+track_multRock->Scale(2.927*82.0/24.0);
+track_multSec->Scale(2.927*82.0/24.0);
+
+
+track_multQE->SetFillColor(kRed); track_multQE->SetLineColor(kRed); track_multQE->SetLineWidth(0);
+
+track_multMEC->SetFillColor(kBlue); track_multMEC->SetLineColor(kBlue); track_multMEC->SetLineWidth(0);
+
+track_multDIS->SetFillColor(kYellow); track_multDIS->SetLineColor(kYellow); 
+
+track_multRES->SetFillColor(kGreen+2); track_multRES->SetLineColor(kGreen+2); 
+
+track_multNC->SetFillColor(kGray); track_multNC->SetLineColor(kGray);
+
+track_multCOH->SetFillColor(kCyan); track_multCOH->SetLineColor(kCyan);
+
+track_multRock->SetFillColor(kViolet); track_multRock->SetLineColor(kViolet);
+
+track_multSec->SetFillColor(kBlack); track_multSec->SetLineColor(kBlack);
+std::cout<<track_multQE->GetMaximum()<<std::endl;
+THStack* h1d_track3=new THStack("hs3","hs3");
+h1d_track3->Add(track_multQE);
+h1d_track3->Add(track_multMEC);
+h1d_track3->Add(track_multDIS);
+h1d_track3->Add(track_multRES);
+h1d_track3->Add(track_multCOH);
+h1d_track3->Add(track_multNC);
+h1d_track3->Add(track_multRock);
+h1d_track3->Add(track_multSec);
+track_mult->GetYaxis()->SetTitleOffset(1.4);
+//track_mult->GetYaxis()->SetRangeUser(0,600*240.0/82.0);
+track_mult->Draw("HIST");
+h1d_track3->Draw("SAME HIST");
+lTrack->Draw("SAME");
+    tL.SetNDC();
+    tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
+c1.Print("track_multStack10Days.png"); c1.Print("track_multStack10Days.pdf");
+track_mult->SetLineWidth(track_multGood->GetLineWidth());
+
+
+
+track_mult->Scale(82.0/240.0);
+track_multQE->Scale(82.0/240.0);
+track_multMEC->Scale(82.0/240.0);
+track_multDIS->Scale(82.0/240.0);
+track_multRES->Scale(82.0/240.0);
+track_multCOH->Scale(82.0/240.0);
+track_multNC->Scale(82.0/240.0);
+track_multRock->Scale(82.0/240.0);
+track_multSec->Scale(82.0/240.0);
+track_multRock->Scale(2);
+track_multQE->SetFillColor(kRed); track_multQE->SetLineColor(kRed); track_multQE->SetLineWidth(0);
+
+track_multMEC->SetFillColor(kBlue); track_multMEC->SetLineColor(kBlue); track_multMEC->SetLineWidth(0);
+
+track_multDIS->SetFillColor(kYellow); track_multDIS->SetLineColor(kYellow);
+
+track_multRES->SetFillColor(kGreen+2); track_multRES->SetLineColor(kGreen+2);
+
+track_multNC->SetFillColor(kGray); track_multNC->SetLineColor(kGray);
+
+track_multCOH->SetFillColor(kCyan); track_multCOH->SetLineColor(kCyan);
+
+track_multRock->SetFillColor(kViolet); track_multRock->SetLineColor(kViolet);
+
+track_multSec->SetFillColor(kBlack); track_multSec->SetLineColor(kBlack);
+track_mult->SetLineWidth(0);
+track_mult->GetYaxis()->SetRangeUser(0,1000);
+THStack* h1d_track4=new THStack("hs4","hs4");
+h1d_track4->Add(track_multQE);
+h1d_track4->Add(track_multMEC);
+h1d_track4->Add(track_multDIS);
+h1d_track4->Add(track_multRES);
+h1d_track4->Add(track_multCOH);
+h1d_track4->Add(track_multNC);
+h1d_track4->Add(track_multRock);
+h1d_track4->Add(track_multSec);
+
+track_mult->SetTitle("Scaled Rock by 2");
+
+track_mult->Draw("HIST");
+h1d_track4->Draw("SAME HIST");
+lTrack->Draw("SAME");
+    tL.SetNDC();
+    tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
+c1.Print("track_multStackRockTimes2.png"); c1.Print("track_multStackRockTimes2.pdf");
+track_mult->SetLineWidth(track_multGood->GetLineWidth());
+
+
+
 
 TH1D* rock=(TH1D*)fPurity.Get("rock");
 rock->GetXaxis()->CenterTitle();
@@ -225,6 +451,157 @@ rock->Draw("E0 P");
 c1.Print("rock.png"); c1.Print("rock.pdf");
 
 
+TH1D* rockWithoutMNV=(TH1D*)fBad.Get("rock");
+rockWithoutMNV->GetXaxis()->CenterTitle();
+rockWithoutMNV->GetXaxis()->SetTitle("Background Event Comes from Rock");
+rockWithoutMNV->GetXaxis()->SetBinLabel(1,"Non-Rock");
+rockWithoutMNV->GetXaxis()->SetBinLabel(2,"Rock");
+rockWithoutMNV->GetYaxis()->SetTitle("Number of Interactions");
+rockWithoutMNV->SetTitle("Classification Without Using MINERvA");
+rockWithoutMNV->GetYaxis()->CenterTitle();
+rockWithoutMNV->SetLineColor(kRed);
+rockWithoutMNV->SetMarkerColor(kRed);
+rockWithoutMNV->Draw("E0 P");
+    tL.SetNDC();
+    tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
+c1.Print("rockWithoutMNV.png"); c1.Print("rockWithoutMNV.pdf");
+
+
+TH1D* track_multWithoutMNV=(TH1D*)fBad.Get("track_mult");
+track_multWithoutMNV->SetLineColor(kRed);
+track_multWithoutMNV->SetMarkerColor(kRed);
+track_multWithoutMNV->GetXaxis()->CenterTitle();
+track_multWithoutMNV->GetXaxis()->SetTitle("Number of Reconstructed Tracks");
+track_multWithoutMNV->GetYaxis()->SetTitle("Number of Interactions");
+track_multWithoutMNV->GetYaxis()->CenterTitle();
+track_multWithoutMNV->SetTitle("Without Using MINERvA");
+
+track_multWithoutMNV->Draw("E0 HIST");
+    tL.SetNDC();
+    tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
+c1.Print("track_multWithoutMNV.png"); c1.Print("track_multWithoutMNV.pdf");
+
+
+TH1D* deltaX=(TH1D*)fMinerva.Get("deltaX");
+TH1D* deltaY=(TH1D*)fMinerva.Get("deltaY");
+deltaX->GetXaxis()->CenterTitle();
+deltaX->GetXaxis()->SetTitle("#Delta X");
+deltaX->GetYaxis()->SetTitle("Number of Tracks");
+deltaX->SetTitle("DS MINERvA-TPC Matching");
+deltaY->SetTitle("DS MINERvA-TPC Matching");
+deltaX->SetLineColor(kRed);
+deltaX->SetMarkerColor(kRed);
+deltaX->GetYaxis()->CenterTitle();
+deltaY->GetXaxis()->CenterTitle();
+deltaY->GetYaxis()->CenterTitle();
+deltaY->GetXaxis()->SetTitle("#Delta Y");
+deltaY->GetYaxis()->SetTitle("Number of Tracks");
+deltaY->SetLineColor(kRed);
+deltaY->SetMarkerColor(kRed);
+
+
+TH1D* dotProduct=(TH1D*)fMinerva.Get("dotProduct");
+dotProduct->GetXaxis()->CenterTitle();
+dotProduct->GetYaxis()->CenterTitle();
+dotProduct->SetLineColor(kRed);
+dotProduct->SetMarkerColor(kRed);
+dotProduct->GetXaxis()->SetTitle("cos(#theta)");
+dotProduct->GetYaxis()->SetTitle("Number of Interactions");
+dotProduct->SetTitle("DS MINERvA-TPC Matching");
+
+
+TH1D* deltaXGood=(TH1D*)fMinerva.Get("deltaXGood");
+TH1D* deltaYGood=(TH1D*)fMinerva.Get("deltaYGood");
+
+deltaXGood->GetXaxis()->CenterTitle();
+deltaXGood->GetXaxis()->SetTitle("#Delta X");
+deltaXGood->SetTitle("Matching: Cheated");
+deltaYGood->SetTitle("Matching: Cheated");
+deltaXGood->GetYaxis()->SetTitle("Number of Tracks");
+deltaXGood->GetYaxis()->CenterTitle();
+deltaYGood->GetXaxis()->CenterTitle();
+deltaYGood->GetYaxis()->CenterTitle();
+deltaYGood->GetXaxis()->SetTitle("#Delta Y");
+deltaYGood->GetYaxis()->SetTitle("Number of Tracks");
+deltaXGood->SetTitle("Cheated");
+deltaYGood->SetTitle("Cheated");
+deltaXGood->SetLineColor(kRed);
+deltaXGood->SetMarkerColor(kRed);
+deltaYGood->SetLineColor(kRed);
+deltaYGood->SetMarkerColor(kRed);
+
+
+
+TH1D* dotProductGood=(TH1D*)fMinerva.Get("dotProductGood");
+dotProductGood->GetXaxis()->CenterTitle();
+dotProductGood->GetYaxis()->CenterTitle();
+dotProductGood->GetXaxis()->SetTitle("cos(#theta)");
+dotProductGood->GetYaxis()->SetTitle("Number of Tracks");
+dotProductGood->SetTitle("Matching: Cheated");
+dotProductGood->SetLineColor(kRed);
+dotProductGood->SetMarkerColor(kRed);
+
+TH1D* deltaXBad=(TH1D*)fMinerva.Get("deltaXBad");
+TH1D* deltaYBad=(TH1D*)fMinerva.Get("deltaYBad");
+deltaXBad->SetTitle("DS MINERvA-TPC Matching: Background");
+deltaYBad->SetTitle("DS MINERvA-TPC Matching: Background");
+
+deltaXBad->GetXaxis()->CenterTitle();
+deltaXBad->GetXaxis()->SetTitle("#Delta X");
+deltaXBad->GetYaxis()->SetTitle("Number of Tracks");
+deltaXBad->GetYaxis()->CenterTitle();
+deltaYBad->GetXaxis()->CenterTitle();
+deltaYBad->GetYaxis()->CenterTitle();
+deltaYBad->GetXaxis()->SetTitle("#Delta Y");
+deltaYBad->GetYaxis()->SetTitle("Number of Tracks");
+
+
+deltaX->Draw("E0 P");
+    tL.SetNDC();
+    tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
+c1.Print("deltaX.png"); c1.Print("deltaX.pdf");
+
+deltaY->Draw("E0 P");
+    tL.SetNDC();
+    tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
+c1.Print("deltaY.png"); c1.Print("deltaY.pdf");
+
+
+deltaXGood->Draw("E0 P");
+    tL.SetNDC();
+    tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
+c1.Print("deltaXGood.png"); c1.Print("deltaXGood.pdf");
+
+
+deltaYGood->Draw("E0 P");
+    tL.SetNDC();
+    tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
+c1.Print("deltaYGood.png"); c1.Print("deltaYGood.pdf");
+
+
+
+deltaXBad->Draw("E0 P");
+    tL.SetNDC();
+    tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
+c1.Print("deltaXBad.png"); c1.Print("deltaXBad.pdf");
+
+
+deltaYBad->Draw("E0 P");
+    tL.SetNDC();
+    tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
+c1.Print("deltaYBad.png"); c1.Print("deltaYBad.pdf");
+
+
+dotProduct->Draw("E0 P");
+    tL.SetNDC();
+    tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
+c1.Print("dotProduct.png"); c1.Print("dotProduct.pdf");
+
+
+dotProductGood->Draw("E0 P");
+    tL.SetNDC();
+    tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
+c1.Print("dotProductGood.png"); c1.Print("dotProductGood.pdf");
 
 
 

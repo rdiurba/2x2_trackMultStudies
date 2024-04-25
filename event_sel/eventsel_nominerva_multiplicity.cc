@@ -32,6 +32,7 @@ return numerator/denominator;
 }
 
 int caf_plotter(std::string input_file_list, std::string output_rootfile){
+double minTrkLength=1;
   double minLength=0; int goodIntNum=0; int badIntNum=0; int goodIntInFidVol=0; int badIntInFidVol=0;
 int goodMINERvAMatch=0; int totalMINERvAMatch=0; 
  double offset=0;
@@ -84,7 +85,7 @@ TH1D *recoHistVertexZ= new TH1D("recoHistVertexZ","recoHistVertexZ",70,1230,1370
 
 
 
-
+  TH1D* recoCosL=new TH1D("recoCosL","recoCosL",50,-1,1);
   TH1D *true_mult=new TH1D("true_mult","true_mult",20,0,20);
   TH1D *true_multFirst=new TH1D("true_multFirst","true_multFirst",20,0,20);
   TH1D *true_multTrkOnly=new TH1D("true_multTrkOnly","true_multTrkOnly",20,0,20);
@@ -212,7 +213,7 @@ TH1D *recoHistVertexZ= new TH1D("recoHistVertexZ","recoHistVertexZ",70,1230,1370
 
        }
        //if (cosL<0.9) continue;
-       if (length>5){ truePartTrkOnly++;
+       if (length>minTrkLength){ truePartTrkOnly++;
  
 
        }
@@ -230,12 +231,12 @@ TH1D *recoHistVertexZ= new TH1D("recoHistVertexZ","recoHistVertexZ",70,1230,1370
         int rock=0;
         bool goodInteraction=false;   
         std::vector<int> trueInteractionIndex;
-        std::vector<int> primaryTrkIndex;
-	
+        std::vector<int> primaryTrkIndex;	
 	for(long unsigned nixn = 0; nixn < sr->common.ixn.dlp.size(); nixn++){
       	  bool oneContained=false; bool oneNotContained=false; goodInteraction=false;
           double biggestMatch=-999; int biggestMatchIndex=-999; double maxDotProductDS=-999; double maxDotProductUS=-999;
-          for (int ntruth=0; ntruth<sr->common.ixn.dlp[nixn].truth.size(); ntruth++){
+        double dirZExiting=-999;   
+       for (int ntruth=0; ntruth<sr->common.ixn.dlp[nixn].truth.size(); ntruth++){
           if (biggestMatch<sr->common.ixn.dlp[nixn].truthOverlap.at(ntruth)){
           biggestMatch=sr->common.ixn.dlp[nixn].truthOverlap.at(ntruth);
           biggestMatchIndex=sr->common.ixn.dlp[nixn].truth.at(ntruth);}}
@@ -313,10 +314,15 @@ TH1D *recoHistVertexZ= new TH1D("recoHistVertexZ","recoHistVertexZ",70,1230,1370
                 if (dirZ<0){ dirZ=-dirZ; dirX=-dirX; dirY=-dirY; auto temp=start_pos; end_pos=start_pos; end_pos=temp;}
         if (std::isnan(start_pos.z)) length=-999;
 	if (length>longestTrk) longestTrk=length;
-        if (sr->common.ixn.dlp[nixn].part.dlp[npart].primary==true && length>5){   
+        if (sr->common.ixn.dlp[nixn].part.dlp[npart].primary==true && length>minTrkLength){   
 		partMult++;
                 trackMult++;
-           if    ((start_pos.z)>58 || (end_pos.z)>58) trackMultExit++; 
+           if    ((start_pos.z)>58 || (end_pos.z)>58){ trackMultExit++; 
+
+               if(dirZ>dirZExiting) dirZExiting=dirZ;
+
+
+		}
 		int maxPartMinerva=-999; int maxTypeMinerva=-999;  
                   int maxIxnMinerva=-999;
 		int maxPartMinervaUS=-999; int maxTypeMinervaUS=-999;      
@@ -326,6 +332,9 @@ TH1D *recoHistVertexZ= new TH1D("recoHistVertexZ","recoHistVertexZ",70,1230,1370
 
          longest_track->Fill(longestTrk);
        if (trackMult>0 && trackMultExit>0){  
+
+recoCosL->Fill(dirZExiting);
+
 if (goodInteraction){ recoBacktrackCCAr->Fill(sr->mc.nu[biggestMatchIndex].iscc);
 recoBacktrackPDGAr->Fill(sr->mc.nu[biggestMatchIndex].pdg);
        if (sr->mc.nu[biggestMatchIndex].iscc && abs(sr->mc.nu[biggestMatchIndex].pdg)==14){
@@ -430,12 +439,12 @@ recoBacktrackPDGSec->Fill(sr->mc.nu[biggestMatchIndex].pdg);
 std::cout<<"Total: "<<true_mult->GetEntries()<<","<<true_multFirst->GetEntries()<<std::endl;
 std::cout<<goodIntNum<<"/"<<goodIntNum+badIntNum<<","<<double(goodIntNum)/true_mult->GetEntries()<<","<<double(goodIntNum)/double(goodIntNum+badIntNum)<<std::endl;
 std::cout<<goodIntInFidVol<<","<<goodIntInFidVol+badIntInFidVol<<","<<double(goodIntInFidVol)/true_mult->GetEntries()<<","<<double(goodIntInFidVol)/double(goodIntInFidVol+badIntInFidVol)<<std::endl;
-std::cout<<track_multGood->GetEntries()<<"/"<<track_mult->GetEntries()<<","<<double(track_multGood->GetEntries())/true_mult->GetEntries()<<","<<double(track_multGood->GetEntries())/track_mult->GetEntries()<<std::endl;  
-std::cout<<track_multGood->Integral(3,50)<<"/"<<track_mult->Integral(3,50)<<","<<double(track_multGood->Integral(3,50))/true_mult->Integral(3,50)<<","<<double(track_multGood->Integral(3,50))/track_mult->Integral(3,50)<<std::endl;  
+std::cout<<"All modules: "<<track_multGood->GetEntries()<<"/"<<track_mult->GetEntries()<<","<<double(track_multGood->GetEntries())/true_mult->GetEntries()<<","<<double(track_multGood->GetEntries())/track_mult->GetEntries()<<std::endl;  
+std::cout<<"All modules more than 2 tracks: "<<track_multGood->Integral(3,50)<<"/"<<track_mult->Integral(3,50)<<","<<double(track_multGood->Integral(3,50))/true_mult->Integral(3,50)<<","<<double(track_multGood->Integral(3,50))/track_mult->Integral(3,50)<<std::endl;  
 
 
-std::cout<<track_multGoodFirst->GetEntries()<<"/"<<track_multFirst->GetEntries()<<","<<double(track_multGoodFirst->GetEntries())/true_multFirst->GetEntries()<<","<<double(track_multGoodFirst->GetEntries())/track_multFirst->GetEntries()<<std::endl;  
-std::cout<<track_multGoodFirst->Integral(3,50)<<"/"<<track_multFirst->Integral(3,50)<<","<<double(track_multGoodFirst->Integral(3,50))/true_multFirst->Integral(3,50)<<","<<double(track_multGoodFirst->Integral(3,50))/track_multFirst->Integral(3,50)<<std::endl; 
+std::cout<<"First modules: "<<track_multGoodFirst->GetEntries()<<"/"<<track_multFirst->GetEntries()<<","<<double(track_multGoodFirst->GetEntries())/true_mult->GetEntries()<<","<<double(track_multGoodFirst->GetEntries())/track_multFirst->GetEntries()<<std::endl;  
+std::cout<<"First modules more than 2 tracks: "<<track_multGoodFirst->Integral(3,50)<<"/"<<track_multFirst->Integral(3,50)<<","<<double(track_multGoodFirst->Integral(3,50))/true_mult->Integral(0,50)<<","<<double(track_multGoodFirst->Integral(3,50))/track_multFirst->Integral(3,50)<<std::endl; 
 std::cout<<"Minerva Match Purity: "<<goodMINERvAMatch<<"/"<<totalMINERvAMatch<<std::endl;
 //Create output file and write your histograms
   TFile *caf_out_file = new TFile(output_rootfile.c_str(), "recreate");
@@ -483,6 +492,7 @@ matchTrue_mult->Write();
   track_multFirst->Write();
   track_multGoodFirst->Write();
   track_multBadFirst->Write();
+  recoCosL->Write();
   bad_originFirst->Write();
 
 

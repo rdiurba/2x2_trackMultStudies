@@ -9,7 +9,7 @@
 #include <string>
 #include "duneanaobj/StandardRecord/StandardRecord.h" //Ideally, this should be SRProxy.h, but there is an include error for that now. Alternatively, you can use SetBranchStatus function in TreeLoader, but it does not work for the common branch (to do)
 
-
+double minTrkLength=1;
 double signed3dDistance(double firstPoint1, double firstPoint2, double firstPoint3, double secondPoint1, double secondPoint2, double secondPoint3, TVector3 point){
 
 double denominator = sqrt( (secondPoint2-firstPoint2)*(secondPoint2-firstPoint2) + (secondPoint1-firstPoint1)*(secondPoint1-firstPoint1)+ (secondPoint3-firstPoint3)*(secondPoint3-firstPoint3));
@@ -69,13 +69,18 @@ TH1D *recoHistVertexZ= new TH1D("recoHistVertexZ","recoHistVertexZ",70,1230,1370
   TH1D *recoBacktrackCCRock=new TH1D("recoBacktrackCCRock","recoBacktrackCCRock",2,0,2);
   TH1D *recoBacktrackCCSec=new TH1D("recoBacktrackCCSec","recoBacktrackCCSec",2,0,2);
 
+  TH2D *responseMult=new TH2D("responseMult","responseMult",15,0,15,15,0,15);
+  TH2D *responseCosL=new TH2D("responseCosL","responseCosL",15,0.85,1,15,0.85,1);
+
   TH1D *recoBacktrackPDGAr=new TH1D("recoBacktrackPDGAr","recoBacktrackPDGAr",40,-20,20);
   TH1D *recoBacktrackPDGRock=new TH1D("recoBacktrackPDGRock","recoBacktrackPDGRock",40,-20,20);
   TH1D *recoBacktrackPDGSec=new TH1D("recoBacktrackPDGSec","recoBacktrackPDGSec",40,-20,20);
 
  TH1D* recoBacktrackElAr=new TH1D("recoBacktrackElAr","recoBacktrackElAr",50,0,20);
- TH1D* recoBacktrackCoslAr=new TH1D("recoBacktrackCoslAr","recoBackTrackCoslAr",100,-1,1);
-
+ TH1D* recoBacktrackCoslAr=new TH1D("recoBacktrackCoslAr","recoBackTrackCoslAr",100,0.85,1);
+ TH1D* minervaMatchPDG=new TH1D("minervaMatchPDG","minervaMatchPDG",6000,-3000,3000);
+ TH1D* minervaMatchE=new TH1D("minervaMatchE","minervaMatchE",50,0,20);
+ TH1D* minervaMatchCos=new TH1D("minervaMatchCos","minervaMatchCos",100,-1,1);
  TH1D* selPionE=new TH1D("selPionE","selPionE",20,0,0.1);
  TH1D* selProtonE=new TH1D("selProtonE","selProtonE",20,0,0.1);
  TH1D* selKaonE=new TH1D("selKaonE","selKaonE",20,0,0.1);
@@ -91,7 +96,7 @@ TH1D *recoHistVertexZ= new TH1D("recoHistVertexZ","recoHistVertexZ",70,1230,1370
  TH1D* selKaonDirX=new TH1D("selKaonDirX","selKaonDirX",20,-1,1);
  TH1D* selKaonDirY=new TH1D("selKaonDirY","selKaonDirY",20,-1,1);
  TH1D* selKaonDirZ=new TH1D("selKaonDirZ","selKaonDirZ",20,-1,1);
-
+ TH1D* selTrkLen=new TH1D("selTrkLen","selTrkLen",50,0,10);
 
  TH1D* selProtonXZ=new TH1D("selProtonXZ","selProtonXZ",20,-1,1);
  TH1D* selProtonYZ=new TH1D("selProtonYZ","selProtonYZ",20,-1,1);
@@ -105,10 +110,19 @@ TH1D *recoHistVertexZ= new TH1D("recoHistVertexZ","recoHistVertexZ",70,1230,1370
  TH1D* selKaonYZ=new TH1D("selKaonYZ","selKaonYZ",20,-1,1);
  TH1D* selKaonXY=new TH1D("selKaonXY","selKaonXY",20,-1,1);
 
+ TH2D* confusionMatrix=new TH2D("confusionMatrix","confusionMatrix",4,0,4,4,0,4);
+
+ TH1D* nPi=new TH1D("nPi","nPi",20,0,20);
+ TH1D* nP=new TH1D("nP","nP",20,0,20);
+ TH1D* escapePi=new TH1D("escapePi","escapePi",20,0,20);
+ TH1D* containPiLen=new TH1D("containPiLen","containPiLen",100,0,20);
+ TH1D* containPLen=new TH1D("containP","containP",100,0,20); 
+
+
  TH1D* truePionEWithRecoInt=new TH1D("truePionEWithRecoInt","truePionEWithRecoInt",20,0,0.1);
  TH1D* trueProtonEWithRecoInt=new TH1D("trueProtonEWithRecoInt","trueProtonEWithRecoInt",20,0,0.1);
  TH1D* trueKaonEWithRecoInt=new TH1D("trueKaonEWithRecoInt","trueKaonEWithRecoInt",20,0,0.1);
-
+ TH1D* trueTrkLen=new TH1D("trueTrkLen","trueTrkLen",50,0,10);
  TH1D* trueProtonWithRecoIntDirX=new TH1D("trueProtonWithRecoIntDirX","trueProtonWithRecoIntDirX",20,-1,1);
  TH1D* trueProtonWithRecoIntDirY=new TH1D("trueProtonWithRecoIntDirY","trueProtonWithRecoIntDirY",20,-1,1);
  TH1D* trueProtonWithRecoIntDirZ=new TH1D("trueProtonWithRecoIntDirZ","trueProtonWithRecoIntDirZ",20,-1,1);
@@ -138,8 +152,11 @@ TH1D *recoHistVertexZ= new TH1D("recoHistVertexZ","recoHistVertexZ",70,1230,1370
 
   TH1D *true_mult=new TH1D("true_mult","true_mult",20,0,20);
   TH1D *true_multTrkOnly=new TH1D("true_multTrkOnly","true_multTrkOnly",20,0,20);
-  TH1D *true_multGENIE=new TH1D("true_multGENIE","true_multGENIE",20,0,20);
+  TH1D *trueDiffPosvsPDirZ=new TH1D("trueDiffPosvsPDirZ","trueDiffPosvsPDirZ",20,-1,1);
 
+
+  TH1D *true_multGENIE=new TH1D("true_multGENIE","true_multGENIE",20,0,20);
+  TH2D *responseGenieToG4= new TH2D("responseGenieToG4","responseGenieToG4",15,0,15,15,0,15);
   TH1D *matchTrue_mult=new TH1D("matchTrue_mult","matchTrue_mult",20,0,20);
   TH1D *matchTrue_multTrkOnly=new TH1D("matchTrue_multTrkOnly","matchTrue_multTrkOnly",20,0,20);
   TH1D *matchTrue_multGENIE=new TH1D("matchTrue_multGENIE","matchTrue_multGENIE",20,0,20);
@@ -153,7 +170,7 @@ TH1D *recoHistVertexZ= new TH1D("recoHistVertexZ","recoHistVertexZ",70,1230,1370
   TH2D *recoVertex2D=new TH2D("recoVertex2D","recoVertex2D",60,-60,60,60,-60,60);
   TH2D *recoVertex2DBadYZ=new TH2D("recoVertex2DBadYZ","recoVertex2DBadYZ",70,-70,70,70,-70,70);
 
-
+  TH1D *recoCosL=new TH1D("recoCosL","recoCosL",100,-1,1);
   TH2D *recoVertex2DBad=new TH2D("recoVertex2DBad","recoVertex2DBad",70,-70,70,70,-70,70);
   TH2D *trueVertex2DBad=new TH2D("trueVertex2DBad","trueVertex2DBad",60,-60,60,60,-60,60);
 
@@ -234,7 +251,7 @@ TH1D *recoHistVertexZ= new TH1D("recoHistVertexZ","recoHistVertexZ",70,1230,1370
        diffPim->Fill(npimPrimaries-npim);
        diffP->Fill(npPrimaries-np);
        diffN->Fill(nneutronsPrimaries-nneutrons);
-
+        int nProton=0; int nPion=0; int escapingPions=0;
       double  Elep=-999; double cosL=-999;
        for(long unsigned primaries=0; primaries<truePrimary.size(); primaries++){
        int pdg=truePrimary[primaries].pdg;
@@ -244,39 +261,49 @@ TH1D *recoHistVertexZ= new TH1D("recoHistVertexZ","recoHistVertexZ",70,1230,1370
 
        if ((abs(pdg)==13 || abs(pdg)==2212 || abs(pdg)==211 || abs(pdg)==321)){
         truePartNoG4++;
-       
+       if (abs(pdg)==211)  nPion++; 
+       if (abs(pdg)==2212)  nProton++; 
        auto start_pos=sr->mc.nu[ntrue].prim[primaries].start_pos;
        auto end_pos=sr->mc.nu[ntrue].prim[primaries].end_pos;
-       if (std::isnan(start_pos.z)){  continue;} 
+       if (std::isnan(start_pos.z)){  continue;}
+       auto p=sr->mc.nu[ntrue].prim[primaries].p; 
        double dX=abs(end_pos.x-start_pos.x);
        double dY=abs(end_pos.y-start_pos.y);
        double dZ=abs(end_pos.z-start_pos.z);
        double length=TMath::Sqrt(dX*dX+dY*dY+dZ*dZ);
+       double lengthP=TMath::Sqrt(p.px*p.px+p.py*p.py+p.pz*p.pz);
        if (sr->mc.nu[ntrue].iscc && abs(sr->mc.nu[ntrue].pdg)==14 && abs(pdg)==13){
      
        Elep=sr->mc.nu[ntrue].prim[primaries].p.E;
        cosL=dZ/length;
        histEl->Fill(Elep);
        histCosl->Fill(cosL);
+       trueDiffPosvsPDirZ->Fill(cosL-p.pz/lengthP);
 
 
-       }
+			}
+       if ((abs(end_pos.z)>60 || abs(end_pos.x)>60) && abs(pdg)==211) escapingPions++;
+       else if (abs(pdg)==211)  containPiLen->Fill(length);
+       if (abs(end_pos.z)<60 && abs(end_pos.x)<60 && abs(pdg)==2212) containPLen->Fill(length);
        //if (cosL<0.9) continue;
-       if (length>5){ truePartTrkOnly++;
+       if (length>minTrkLength){ truePartTrkOnly++;
  
 
        }
        }
        truePart++;
-       }
-       true_mult->Fill(truePart); if (truePartTrkOnly>0) true_multTrkOnly->Fill(truePartTrkOnly);    true_multGENIE->Fill(truePartNoG4);
+       
+	}
+       if (cosL<0.9 && Elep<1) continue;
+     escapePi->Fill(escapingPions); nPi->Fill(nPion); nP->Fill(nProton); true_mult->Fill(truePart); if (truePartTrkOnly>0) true_multTrkOnly->Fill(truePartTrkOnly);    true_multGENIE->Fill(truePartNoG4);
+       responseGenieToG4->Fill(truePart,truePartTrkOnly);
        hasANeutrino=true;  
   }
     //for(long unsigned nixn=0; nixn<sr  
 
   //if (hasANeutrino==false) continue;
 
-       //if (sr->common.ixn.dlp.size()>1) continue; 
+        
         int rock=0;
         bool goodInteraction=false;   
         std::vector<int> trueInteractionIndex;
@@ -286,7 +313,8 @@ TH1D *recoHistVertexZ= new TH1D("recoHistVertexZ","recoHistVertexZ",70,1230,1370
       	  bool oneContained=false; bool oneNotContained=false; goodInteraction=false;
           double biggestMatch=-999; int biggestMatchIndex=-999; double maxDotProductDS=-999; double maxDotProductUS=-999;
             int maxEventPar=-999; int maxEventTyp=-9999; int maxEventIxn=-999;
-           for (int ntruth=0; ntruth<sr->common.ixn.dlp[nixn].truth.size(); ntruth++){
+           double dirZExiting=-999;   double startZMuonCand=-999;
+        for (int ntruth=0; ntruth<sr->common.ixn.dlp[nixn].truth.size(); ntruth++){
           
           if (biggestMatch<sr->common.ixn.dlp[nixn].truthOverlap.at(ntruth)){
           
@@ -337,7 +365,7 @@ TH1D *recoHistVertexZ= new TH1D("recoHistVertexZ","recoHistVertexZ",70,1230,1370
                 int correctShower=2;
 		 double longestTrk=-9999;
     int trackMult=0;  int trackMultExit=0; int minervaTracks=0; int minervaThrough=0; 
-    	for(long unsigned npart=0; npart < sr->common.ixn.dlp[nixn].part.dlp.size(); npart++){ //loop over particles
+  	for(long unsigned npart=0; npart < sr->common.ixn.dlp[nixn].part.dlp.size(); npart++){ //loop over particles
  	//std::cout<<"Containment variable: "<<sr->common.ixn.dlp[nixn].part.dlp[npart].contained<<std::endl;
                 if (!sr->common.ixn.dlp[nixn].part.dlp[npart].primary) continue; 
                int pdg=sr->common.ixn.dlp[nixn].part.dlp[npart].pdg;
@@ -346,8 +374,7 @@ TH1D *recoHistVertexZ= new TH1D("recoHistVertexZ","recoHistVertexZ",70,1230,1370
 
        auto start_pos=sr->common.ixn.dlp[nixn].part.dlp[npart].start;
        auto end_pos=sr->common.ixn.dlp[nixn].part.dlp[npart].end;
-
-	double diffVertexdZ=abs(start_pos.z-sr->common.ixn.dlp[nixn].vtx.z);
+       	double diffVertexdZ=abs(start_pos.z-sr->common.ixn.dlp[nixn].vtx.z);
 	double diffVertexdX=abs(start_pos.x-sr->common.ixn.dlp[nixn].vtx.x);
 	double diffVertexdY=abs(start_pos.y-sr->common.ixn.dlp[nixn].vtx.y);
 	double diffVertex=TMath::Sqrt(diffVertexdZ*diffVertexdZ+diffVertexdY*diffVertexdY+diffVertexdX*diffVertexdX);
@@ -362,7 +389,7 @@ TH1D *recoHistVertexZ= new TH1D("recoHistVertexZ","recoHistVertexZ",70,1230,1370
                 if (dirZ<0){ dirZ=-dirZ; dirX=-dirX; dirY=-dirY; auto temp=start_pos; end_pos=start_pos; end_pos=temp;}
         if (std::isnan(start_pos.z)) length=-999;
 	if (length>longestTrk) longestTrk=length;
-        if (sr->common.ixn.dlp[nixn].part.dlp[npart].primary==true && length>5){   
+        if (sr->common.ixn.dlp[nixn].part.dlp[npart].primary==true && length>minTrkLength){   
 		partMult++;
                 trackMult++;
            if    ((start_pos.z)>58 || (end_pos.z)>58) trackMultExit++; 
@@ -385,7 +412,6 @@ TH1D *recoHistVertexZ= new TH1D("recoHistVertexZ","recoHistVertexZ",70,1230,1370
                 
 
 
-
 		if (start_z>0 && ((start_pos.z)>58 || (end_pos.z)>58) ){
 		int truthPart=sr->nd.minerva.ixn[i].tracks[j].truth[0].part;
 		double dXMnv=(sr->nd.minerva.ixn[i].tracks[j].end.x-sr->nd.minerva.ixn[i].tracks[j].start.x);
@@ -403,13 +429,13 @@ TH1D *recoHistVertexZ= new TH1D("recoHistVertexZ","recoHistVertexZ",70,1230,1370
 		double diffExtrap=TMath::Sqrt(TMath::Power(extrapY-start_y,2));
 
 
-		if (dotProductDS<dotProduct && abs(extrapY)<10 && abs(TMath::ACos(dirXMinerva)-TMath::ACos(dirX))<0.06 && abs(TMath::ACos(dirYMinerva)-TMath::ACos(dirY))<0.06 && abs(extrapX)<10){ dotProductDS=dotProduct;
+		if (dotProductDS<dotProduct && abs(extrapY)<10 && abs(TMath::ATan(dirXMinerva/dirZMinerva)-TMath::ATan(dirX/dirZ))<0.06 && abs(TMath::ATan(dirYMinerva/dirZMinerva)-TMath::ATan(dirY/dirZ))<0.06 && abs(extrapX)<10){ dotProductDS=dotProduct;
 		deltaExtrapY=extrapY;
 		deltaExtrapX=extrapX;
 		maxPartMinerva=sr->nd.minerva.ixn[i].tracks[j].truth[0].part;
 		maxTypeMinerva=sr->nd.minerva.ixn[i].tracks[j].truth[0].type;
                 maxIxnMinerva=sr->nd.minerva.ixn[i].tracks[j].truth[0].ixn;	
-		if (end_z>300) minervaPass=1;
+		if (end_z>300){ minervaPass=1; if(dirZExiting<dirZ) dirZExiting=dirZ;}
                 }}
 
 		if (start_z<0 && end_z>0 && ( (start_pos.z<-58 && end_pos.z>58) || (start_pos.z>58 && end_pos.z<-58))){
@@ -428,7 +454,7 @@ TH1D *recoHistVertexZ= new TH1D("recoHistVertexZ","recoHistVertexZ",70,1230,1370
 		double extrapXUS=dirX/dirZ*(extrapdZUS)+end_pos.x-end_x;
 		
                 //double diffExtrap=TMath::Sqrt(TMath::Power(extrapY-end_y,2));
-		if (dotProductUS<dotProduct  && abs(extrapYUS)<10 && abs(extrapXUS)<10 && abs(TMath::ACos(dirXMinerva)-TMath::ACos(dirX))<0.06 && abs(TMath::ACos(dirYMinerva)-TMath::ACos(dirY))<0.06) dotProductUS=dotProduct;
+		if (dotProductUS<dotProduct  && abs(extrapYUS)<10 && abs(extrapXUS)<10 && abs(TMath::ATan(dirXMinerva/dirZMinerva)-TMath::ATan(dirX/dirZ))<0.06 && abs(TMath::ATan(dirYMinerva/dirZMinerva)-TMath::ATan(dirY/dirZ))<0.06) dotProductUS=dotProduct;
 		deltaExtrapYUS=extrapYUS;
                 deltaExtrapXUS=extrapXUS;
 		maxPartMinervaUS=sr->nd.minerva.ixn[i].tracks[j].truth[0].part;
@@ -445,16 +471,40 @@ TH1D *recoHistVertexZ= new TH1D("recoHistVertexZ","recoHistVertexZ",70,1230,1370
         maxEventTyp=maxTypeMinerva;
         maxEventIxn=maxIxnMinerva;
 	}
-	 if (dotProductDS>0.9975){  minervaTracks++; if (minervaPass==1){ minervaThrough++; 
-/*		if (maxPartNumber==maxPartMinerva && maxTypeMinerva==maxTypeNumber){ goodMINERvAMatch++; deltaXGood->Fill(deltaExtrapX); deltaYGood->Fill(deltaExtrapY);}
-  else{ deltaYBad->Fill(deltaExtrapY); deltaXBad->Fill(deltaExtrapX);}
-	      totalMINERvAMatch++;       
-*/	
-          //std::cout<<maxIxnMinerva<<","<<biggestMatchIndex<<","<<maxTypeMinerva<<","<<maxPartMinerva<<","<<maxTypeNumber<<","<<maxPartNumber<<std::endl;
-         if (maxTypeMinerva<3 && maxPartNumber==maxPartMinerva && maxTypeMinerva==maxTypeNumber) std::cout<<sr->mc.nu[maxIxnMinerva].prim[maxPartMinerva].pdg<<std::endl;
+	 if (dotProductDS>0.9975){  minervaTracks++; if (minervaPass==1){ minervaThrough++;
+             startZMuonCand=start_pos.z; if (start_pos.z>end_pos.z) startZMuonCand=end_pos.z;
 
 
-	 }}
+/*
+          if (maxEventTyp==1){  minervaMatchPDG->Fill(sr->mc.nu[maxEventIxn].prim[maxEventPar].pdg); int minervaPDG=sr->mc.nu[maxEventIxn].prim[maxEventPar].pdg;
+         if (abs(minervaPDG)==13){ minervaMatchE->Fill(sr->mc.nu[maxEventIxn].prim[maxEventPar].p.E);
+               auto start_posMnv=sr->mc.nu[maxEventIxn].prim[maxEventPar].start_pos;
+       auto end_posMnv=sr->mc.nu[maxEventIxn].prim[maxEventPar].end_pos;
+       if (!std::isnan(start_posMnv.z)){
+       double dX=(end_posMnv.x-start_posMnv.x);
+       double dY=(end_posMnv.y-start_posMnv.y);
+       double dZ=(end_posMnv.z-start_posMnv.z);
+       double length=TMath::Sqrt(dX*dX+dY*dY+dZ*dZ);
+       double cosL=dZ/length;
+       //   minervaMatchCos->Fill(cosL);
+       std::cout<<startZ<<","<<start_posMnv.z<<std::endl;}}}*/
+       //
+/*
+          if (maxEventTyp==1){  minervaMatchPDG->Fill(sr->mc.nu[maxEventIxn].prim[maxEventPar].pdg); int minervaPDG=sr->mc.nu[maxEventIxn].prim[maxEventPar].pdg;
+         if (abs(pdg)==13){ minervaMatchE->Fill(sr->mc.nu[maxEventIxn].prim[maxEventPar].p.E);
+               auto start_pos=sr->mc.nu[maxEventIxn].prim[maxEventPar].start_pos;
+       auto end_pos=sr->mc.nu[maxEventIxn].prim[maxEventPar].end_pos;
+       if (!std::isnan(start_pos.z)){
+       double dX=abs(end_pos.x-start_pos.x);
+       double dY=abs(end_pos.y-start_pos.y);
+       double dZ=abs(end_pos.z-start_pos.z);
+       double length=TMath::Sqrt(dX*dX+dY*dY+dZ*dZ);
+       double cosL=dZ/length;
+          minervaMatchCos->Fill(cosL); 
+
+		}}}*/
+         }
+	} 
 	if (dotProductUS>maxDotProductUS) maxDotProductUS=dotProductUS;
 	 if (dotProductUS>0.9975){   
 /*		if (maxPartNumber==maxPartMinervaUS && maxTypeMinervaUS==maxTypeNumber){ deltaYGoodUS->Fill(deltaExtrapYUS); deltaXGoodUS->Fill(deltaExtrapXUS); goodMINERvAMatchUS++;} 
@@ -466,8 +516,29 @@ TH1D *recoHistVertexZ= new TH1D("recoHistVertexZ","recoHistVertexZ",70,1230,1370
 //else oneContained=true;
 		} // primary of particle greater than 5
 		  } } // particles
-	if (minervaTracks>1 || minervaThrough<1 ||  maxDotProductDS<0.9975) continue;
+	if (/*minervaTracks>1 ||*/ minervaThrough<1 ||  maxDotProductDS<0.9975) continue;
 //	if (maxDotProductUS>0.9999) continue;
+
+        
+
+          if (maxEventTyp==1){  minervaMatchPDG->Fill(sr->mc.nu[maxEventIxn].prim[maxEventPar].pdg); int minervaPDG=sr->mc.nu[maxEventIxn].prim[maxEventPar].pdg;
+         if (abs(minervaPDG)==13){ minervaMatchE->Fill(sr->mc.nu[maxEventIxn].prim[maxEventPar].p.E);
+               auto start_posMnv=sr->mc.nu[maxEventIxn].prim[maxEventPar].start_pos;
+       auto end_posMnv=sr->mc.nu[maxEventIxn].prim[maxEventPar].end_pos;
+       
+       double dX=(end_posMnv.x-start_posMnv.x);
+       double dY=(end_posMnv.y-start_posMnv.y);
+       double dZ=(end_posMnv.z-start_posMnv.z);
+       
+       auto p=sr->mc.nu[maxEventIxn].prim[maxEventPar].p;
+       double length=TMath::Sqrt(p.px*p.px+p.py*p.py+p.pz*p.pz);
+       double cosL=p.pz/length;
+ 
+       if (abs(startZMuonCand-start_posMnv.z)<5)   minervaMatchCos->Fill(cosL);
+       std::cout<<startZMuonCand<<","<<start_posMnv.z<<","<<cosL<<std::endl;
+          std::cout<<biggestMatchIndex<<","<<maxEventIxn<<std::endl;
+	  }}
+
 
 
  //std::cout<<"counting protons and kaons"<<std::endl;
@@ -476,14 +547,21 @@ TH1D *recoHistVertexZ= new TH1D("recoHistVertexZ","recoHistVertexZ",70,1230,1370
       
       auto start_pos=sr->mc.nu[biggestMatchIndex].prim[primaries].start_pos;
       auto end_pos=sr->mc.nu[biggestMatchIndex].prim[primaries].end_pos;
-      if (std::isnan(start_pos.z)) continue;
+      //if (std::isnan(start_pos.z)) continue;
       //std::cout<<"Got a position"<<std::endl; 
-	      
-               double dX=(end_pos.x-start_pos.x);
-               double dY=(end_pos.y-start_pos.y);
-               double dZ=(end_pos.z-start_pos.z);
+	       auto p=sr->mc.nu[biggestMatchIndex].prim[primaries].p; 
+               double dX=p.px;//(end_pos.x-start_pos.x);
+               double dY=p.py;//(end_pos.y-start_pos.y);
+               double dZ=p.pz;//(end_pos.z-start_pos.z);
                double length=TMath::Sqrt(dX*dX+dY*dY+dZ*dZ);
                 double dirX=dX/length; double dirY=dY/length; double dirZ=dZ/length;
+               double dXLen=(end_pos.x-start_pos.x);
+               double dYLen=(end_pos.y-start_pos.y);
+               double dZLen=(end_pos.z-start_pos.z);
+               double lengthPos=TMath::Sqrt(dXLen*dXLen+dYLen*dYLen+dZLen*dZLen);
+
+     if (!std::isnan(start_pos.z) && (abs(sr->mc.nu[biggestMatchIndex].prim[primaries].pdg)==211 || abs(sr->mc.nu[biggestMatchIndex].prim[primaries].pdg)==13 || abs(sr->mc.nu[biggestMatchIndex].prim[primaries].pdg)==2212)) trueTrkLen->Fill(lengthPos);
+
       if(abs(sr->mc.nu[biggestMatchIndex].prim[primaries].pdg)==2212){ trueProtonEWithRecoInt->Fill(sr->mc.nu[biggestMatchIndex].prim[primaries].p.E-0.938272); trueProtonWithRecoIntDirZ->Fill(dirZ); trueProtonWithRecoIntDirX->Fill(dirX); trueProtonWithRecoIntDirY->Fill(dirY);} 
           if(abs(sr->mc.nu[biggestMatchIndex].prim[primaries].pdg)==211){ truePionEWithRecoInt->Fill(sr->mc.nu[biggestMatchIndex].prim[primaries].p.E-0.13957);
 truePionWithRecoIntDirZ->Fill(dirZ); truePionWithRecoIntDirX->Fill(dirX); truePionWithRecoIntDirY->Fill(dirY);
@@ -499,6 +577,17 @@ truePionWithRecoIntDirZ->Fill(dirZ); truePionWithRecoIntDirX->Fill(dirX); truePi
  	//std::cout<<"Containment variable: "<<sr->common.ixn.dlp[nixn].part.dlp[npart].contained<<std::endl;
                 if (!sr->common.ixn.dlp[nixn].part.dlp[npart].primary) continue; 
                int pdg=sr->common.ixn.dlp[nixn].part.dlp[npart].pdg;
+        
+       auto start_pos=sr->common.ixn.dlp[nixn].part.dlp[npart].start;
+       auto end_pos=sr->common.ixn.dlp[nixn].part.dlp[npart].end;
+               double dX=(end_pos.x-start_pos.x);
+               double dY=(end_pos.y-start_pos.y);
+               double dZ=(end_pos.z-start_pos.z);
+               double length=TMath::Sqrt(dX*dX+dY*dY+dZ*dZ);
+                double dirX=dX/length; double dirY=dY/length; double dirZ=dZ/length;
+
+
+
 if ( abs(pdg)==22 || abs(pdg)==11 || abs(pdg)==111){
 auto truthSize=sr->common.ixn.dlp[nixn].part.dlp[npart].truth.size();
 double maxPartTruthOverlap=0;
@@ -566,17 +655,36 @@ maxTypeNumber=parType;
 if (parType<3) backtracked=sr->mc.nu[interactionNumber].prim[partNumber].pdg;
 else backtracked=sr->mc.nu[interactionNumber].sec[partNumber].pdg;
 if (parType<3){
-      auto start_pos=sr->mc.nu[interactionNumber].prim[partNumber].start_pos;
-      if (std::isnan(start_pos.z)) continue;
+      int pdgNumber=0;
+      if (abs(pdg)==13){ pdgNumber=0;}
+      else if (abs(pdg)==2212){ pdgNumber=1;}
+      else if (abs(pdg)==211){ pdgNumber=2;}
+      else{ pdgNumber=3;}
+      int backtrackedPDG=0;
+      if (abs(backtracked)==13) backtrackedPDG=0;
+      else if (abs(backtracked)==2212){ backtrackedPDG=1;}
+      else if (abs(backtracked)==211){ backtrackedPDG=2;}
+      else{ backtrackedPDG=3;}
+       confusionMatrix->Fill(pdgNumber,backtrackedPDG);
 
+      auto start_pos=sr->mc.nu[interactionNumber].prim[partNumber].start_pos;
+      //if (std::isnan(start_pos.z)) continue;
+      auto p=sr->mc.nu[interactionNumber].prim[partNumber].p;
       auto end_pos=sr->mc.nu[interactionNumber].prim[partNumber].end_pos;
 	      
-               double dX=(end_pos.x-start_pos.x);
-               double dY=(end_pos.y-start_pos.y);
-               double dZ=(end_pos.z-start_pos.z);
+               double dX=p.px;//(end_pos.x-start_pos.x);
+               double dY=p.py;//(end_pos.y-start_pos.y);
+               double dZ=p.pz;//(end_pos.z-start_pos.z);
                double length=TMath::Sqrt(dX*dX+dY*dY+dZ*dZ);
-                double dirX=dX/length; double dirY=dY/length; double dirZ=dZ/length;
 
+
+               double dXLen=(end_pos.x-start_pos.x);
+               double dYLen=(end_pos.y-start_pos.y);
+               double dZLen=(end_pos.z-start_pos.z);
+               double lengthPos=TMath::Sqrt(dXLen*dXLen+dYLen*dYLen+dZLen*dZLen);
+      
+          double dirX=dX/length; double dirY=dY/length; double dirZ=dZ/length;
+                 if (!std::isnan(start_pos.z) && (backtracked==2212 || abs(backtracked)==13 || abs(backtracked)==211) && parType<3) selTrkLen->Fill(lengthPos);
 if (sr->mc.nu[biggestMatchIndex].targetPDG==1000180400 && backtracked==2212 && parType<3){ selProtonE->Fill(sr->mc.nu[interactionNumber].prim[partNumber].p.E-0.938272);
 selProtonDirX->Fill(dirX); selProtonDirZ->Fill(dirZ); selProtonDirY->Fill(dirY);
 
@@ -604,50 +712,34 @@ if (partTruthOverlap<0.5) correctTrack=2;
 else backtracked=-1; 
 }}
 }
-
+int trueMatchMult=0;
        if (trackMult>0 && trackMultExit>0 /*&& oneContained && oneNotContained*/){  
-       if (goodInteraction){ recoBacktrackCCAr->Fill(sr->mc.nu[biggestMatchIndex].iscc);
+        recoCosL->Fill(dirZExiting); 
+      if (goodInteraction){ recoBacktrackCCAr->Fill(sr->mc.nu[biggestMatchIndex].iscc);
 recoBacktrackPDGAr->Fill(sr->mc.nu[biggestMatchIndex].pdg);
        if (sr->mc.nu[biggestMatchIndex].iscc && abs(sr->mc.nu[biggestMatchIndex].pdg)==14){
-       for (int primaries=0; primaries<sr->mc.nu[biggestMatchIndex].prim.size(); primaries++){
-       if (abs(sr->mc.nu[biggestMatchIndex].prim[primaries].pdg)!=13) continue;
+        
+      for (int primaries=0; primaries<sr->mc.nu[biggestMatchIndex].prim.size(); primaries++){
        double Elep=sr->mc.nu[biggestMatchIndex].prim[primaries].p.E;
             auto start_pos=sr->mc.nu[biggestMatchIndex].prim[primaries].start_pos;
        auto end_pos=sr->mc.nu[biggestMatchIndex].prim[primaries].end_pos;
-       /*if (std::isnan(start_pos.z)) continue;
-       double dX=abs(end_pos.x-start_pos.x);
-       double dY=abs(end_pos.y-start_pos.y);
-       double dZ=abs(end_pos.z-start_pos.z);
-       double length=TMath::Sqrt(dX*dX+dY*dY+dZ*dZ);
-       double cosL=dZ/length;
+       auto p=sr->mc.nu[biggestMatchIndex].prim[primaries].p;
+       //if (std::isnan(start_pos.z)) continue;
+       double dX=(end_pos.x-start_pos.x);
+       double dY=(end_pos.y-start_pos.y);
+       double dZ=(end_pos.z-start_pos.z);
+       double length=TMath::Sqrt(p.px*p.px+p.py*p.py+p.pz*p.pz);
+       double cosL=p.pz/length;
+       int truePDG=sr->mc.nu[biggestMatchIndex].prim[primaries].pdg;
+       if ((abs(truePDG)==13 || abs(truePDG)==211 || abs(truePDG)==2212) && length>minTrkLength) trueMatchMult++;
 //if (goodInteraction)       std::cout<<biggestMatch<<","<<sr->common.ixn.dlp[nixn].vtx.z<<","<<sr->mc.nu[biggestMatchIndex].vtx.z<<","<<start_pos.z<<","<<end_pos.z<<std::endl;
-       recoBacktrackElAr->Fill(Elep);
-       recoBacktrackCoslAr->Fill(cosL);*/
+        if (abs(sr->mc.nu[biggestMatchIndex].prim[primaries].pdg)!=13) continue;     
+      recoBacktrackElAr->Fill(Elep);
+       recoBacktrackCoslAr->Fill(cosL); responseCosL->Fill(dirZExiting,cosL);
        }
-      
+       responseMult->Fill(trackMult,trueMatchMult); 
        }
-
-
-
-
-
-
-
-
-
-
-       if (maxEventTyp<3){
-       auto start_pos=sr->mc.nu[maxEventIxn].prim[maxEventPar].start_pos;
-       auto end_pos=sr->mc.nu[maxEventIxn].prim[maxEventPar].end_pos;
-       if (!std::isnan(start_pos.z)){
-       double dX=abs(end_pos.x-start_pos.x);
-       double dY=abs(end_pos.y-start_pos.y);
-       double dZ=abs(end_pos.z-start_pos.z);
-       double length=TMath::Sqrt(dX*dX+dY*dY+dZ*dZ);
-       double cosL=dZ/length;
-       //std::cout<<end_pos.z<<","<<start_pos.z<<std::endl;
-	recoBacktrackCoslAr->Fill(cosL);
-       }}
+}
   
 }
 if (!goodInteraction && sr->mc.nu[biggestMatchIndex].id>1E9){  recoBacktrackCCRock->Fill(sr->mc.nu[biggestMatchIndex].iscc);
@@ -657,7 +749,6 @@ recoBacktrackPDGRock->Fill(sr->mc.nu[biggestMatchIndex].pdg);
 }
 if (!goodInteraction && sr->mc.nu[biggestMatchIndex].id<1E9){ recoBacktrackCCSec->Fill(sr->mc.nu[biggestMatchIndex].iscc);
 recoBacktrackPDGSec->Fill(sr->mc.nu[biggestMatchIndex].pdg);
-
 
 }
 		track_mult->Fill(trackMult);
@@ -682,7 +773,7 @@ recoBacktrackPDGSec->Fill(sr->mc.nu[biggestMatchIndex].pdg);
          recoVertex2DBad->Fill(sr->common.ixn.dlp[nixn].vtx.x,sr->common.ixn.dlp[nixn].vtx.z);  trueVertex2DBad->Fill(trueVtxX,trueVtxZ);
           recoVertex2DBadYZ->Fill(sr->common.ixn.dlp[nixn].vtx.y,sr->common.ixn.dlp[nixn].vtx.z);
         } 
-	}
+	
     
     part_mult->Fill(partMult);      
  
@@ -718,6 +809,10 @@ std::cout<<"All events with MINERvA match and <=2 tracks: "<<track_multGood->Int
   track_multCOH->Write();
   track_multRock->Write();
   track_multSec->Write();
+  minervaMatchPDG->Write();
+  minervaMatchCos->Write();
+  minervaMatchE->Write();
+responseCosL->Write();
 recoBacktrackCCAr->Write(); recoBacktrackCCRock->Write();
    recoBacktrackCCSec->Write();
 recoBacktrackPDGSec->Write(); recoBacktrackPDGAr->Write();
@@ -768,7 +863,8 @@ matchTrue_mult->Write();
   auto kaonDirX=new TEfficiency(*selKaonDirX,*trueKaonWithRecoIntDirX);
   auto kaonDirY=new TEfficiency(*selKaonDirY,*trueKaonWithRecoIntDirY);
   auto kaonDirZ=new TEfficiency(*selKaonDirZ,*trueKaonWithRecoIntDirZ);
-
+  auto effTrkLen=new TEfficiency(*selTrkLen,*trueTrkLen);
+  effTrkLen->Write();
   protonDirX->Write(); protonDirY->Write(); protonDirZ->Write();
   pionDirX->Write(); pionDirY->Write(); pionDirZ->Write();
   kaonDirX->Write(); kaonDirY->Write(); kaonDirZ->Write();
@@ -776,8 +872,13 @@ matchTrue_mult->Write();
   protonKEEff->Write();
   kaonKEEff->Write();
   pionKEEff->Write();
-
-
+  nP->Write(); nPi->Write(); escapePi->Write(); containPiLen->Write();
+  responseMult->Write();
+  responseGenieToG4->Write();
+  containPLen->Write();
+  confusionMatrix->Write();
+  recoCosL->Write();
+  trueDiffPosvsPDirZ->Write();
   caf_out_file->Close();
   
   return 1;  
