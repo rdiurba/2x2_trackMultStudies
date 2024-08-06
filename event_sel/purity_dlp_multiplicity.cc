@@ -81,9 +81,9 @@ TH1D *recoHistVertexZ= new TH1D("recoHistVertexZ","recoHistVertexZ",70,1230,1370
  TH1D* minervaMatchPDG=new TH1D("minervaMatchPDG","minervaMatchPDG",6000,-3000,3000);
  TH1D* minervaMatchE=new TH1D("minervaMatchE","minervaMatchE",50,0,20);
  TH1D* minervaMatchCos=new TH1D("minervaMatchCos","minervaMatchCos",100,-1,1);
- TH1D* selPionE=new TH1D("selPionE","selPionE",20,0,0.1);
- TH1D* selProtonE=new TH1D("selProtonE","selProtonE",20,0,0.1);
- TH1D* selKaonE=new TH1D("selKaonE","selKaonE",20,0,0.1);
+ TH1D* selPionE=new TH1D("selPionE","selPionE",10,0,0.1);
+ TH1D* selProtonE=new TH1D("selProtonE","selProtonE",10,0,0.1);
+ TH1D* selKaonE=new TH1D("selKaonE","selKaonE",10,0,0.1);
 
  TH1D* selPionDirX=new TH1D("selPionDirX","selPionDirX",20,-1,1);
  TH1D* selPionDirY=new TH1D("selPionDirY","selPionDirY",20,-1,1);
@@ -96,8 +96,9 @@ TH1D *recoHistVertexZ= new TH1D("recoHistVertexZ","recoHistVertexZ",70,1230,1370
  TH1D* selKaonDirX=new TH1D("selKaonDirX","selKaonDirX",20,-1,1);
  TH1D* selKaonDirY=new TH1D("selKaonDirY","selKaonDirY",20,-1,1);
  TH1D* selKaonDirZ=new TH1D("selKaonDirZ","selKaonDirZ",20,-1,1);
- TH1D* selTrkLen=new TH1D("selTrkLen","selTrkLen",50,0,10);
-
+ TH1D* selTrkLen=new TH1D("selTrkLen","selTrkLen",20,0,10);
+ TH1D* selTrkLenNonQE= new TH1D("selTrkLenNonQE","selTrkLenNonQE",20,0,10);
+ TH1D* selTrkLenQE= new TH1D("selTrkLenQE","selTrkLenQE",20,0,10);
  TH1D* selProtonXZ=new TH1D("selProtonXZ","selProtonXZ",20,-1,1);
  TH1D* selProtonYZ=new TH1D("selProtonYZ","selProtonYZ",20,-1,1);
  TH1D* selProtonXY=new TH1D("selProtonXY","selProtonXY",20,-1,1);
@@ -119,10 +120,13 @@ TH1D *recoHistVertexZ= new TH1D("recoHistVertexZ","recoHistVertexZ",70,1230,1370
  TH1D* containPLen=new TH1D("containP","containP",100,0,20); 
 
 
- TH1D* truePionEWithRecoInt=new TH1D("truePionEWithRecoInt","truePionEWithRecoInt",20,0,0.1);
- TH1D* trueProtonEWithRecoInt=new TH1D("trueProtonEWithRecoInt","trueProtonEWithRecoInt",20,0,0.1);
- TH1D* trueKaonEWithRecoInt=new TH1D("trueKaonEWithRecoInt","trueKaonEWithRecoInt",20,0,0.1);
- TH1D* trueTrkLen=new TH1D("trueTrkLen","trueTrkLen",50,0,10);
+ TH1D* truePionEWithRecoInt=new TH1D("truePionEWithRecoInt","truePionEWithRecoInt",10,0,0.1);
+ TH1D* trueProtonEWithRecoInt=new TH1D("trueProtonEWithRecoInt","trueProtonEWithRecoInt",10,0,0.1);
+ TH1D* trueKaonEWithRecoInt=new TH1D("trueKaonEWithRecoInt","trueKaonEWithRecoInt",10,0,0.1);
+
+TH1D* trueTrkLenQE=new TH1D("trueTrkLenQE","trueTrkLenQE",20,0,10);
+TH1D* trueTrkLenNonQE=new TH1D("trueTrkLenNonQE","trueTrkLenNonQE",20,0,10);
+TH1D* trueTrkLen=new TH1D("trueTrkLen","trueTrkLen",20,0,10);
  TH1D* trueProtonWithRecoIntDirX=new TH1D("trueProtonWithRecoIntDirX","trueProtonWithRecoIntDirX",20,-1,1);
  TH1D* trueProtonWithRecoIntDirY=new TH1D("trueProtonWithRecoIntDirY","trueProtonWithRecoIntDirY",20,-1,1);
  TH1D* trueProtonWithRecoIntDirZ=new TH1D("trueProtonWithRecoIntDirZ","trueProtonWithRecoIntDirZ",20,-1,1);
@@ -265,7 +269,7 @@ TH1D *recoHistVertexZ= new TH1D("recoHistVertexZ","recoHistVertexZ",70,1230,1370
        if (abs(pdg)==2212)  nProton++; 
        auto start_pos=sr->mc.nu[ntrue].prim[primaries].start_pos;
        auto end_pos=sr->mc.nu[ntrue].prim[primaries].end_pos;
-       if (std::isnan(start_pos.z)){  continue;}
+       //if (std::isnan(start_pos.z)){  continue;}
        auto p=sr->mc.nu[ntrue].prim[primaries].p; 
        double dX=abs(end_pos.x-start_pos.x);
        double dY=abs(end_pos.y-start_pos.y);
@@ -278,6 +282,9 @@ TH1D *recoHistVertexZ= new TH1D("recoHistVertexZ","recoHistVertexZ",70,1230,1370
        cosL=dZ/length;
        histEl->Fill(Elep);
        histCosl->Fill(cosL);
+       //std::cout<<n<<","<<ntrue<<","<<primaries<<","<<dX<<","<<dY<<","<<dZ<<","<<p.pz/lengthP<<std::endl;
+
+
        trueDiffPosvsPDirZ->Fill(cosL-p.pz/lengthP);
 
 
@@ -535,8 +542,8 @@ TH1D *recoHistVertexZ= new TH1D("recoHistVertexZ","recoHistVertexZ",70,1230,1370
        double cosL=p.pz/length;
  
        if (abs(startZMuonCand-start_posMnv.z)<5)   minervaMatchCos->Fill(cosL);
-       std::cout<<startZMuonCand<<","<<start_posMnv.z<<","<<cosL<<std::endl;
-          std::cout<<biggestMatchIndex<<","<<maxEventIxn<<std::endl;
+//       std::cout<<startZMuonCand<<","<<start_posMnv.z<<","<<cosL<<std::endl;
+  //        std::cout<<biggestMatchIndex<<","<<maxEventIxn<<std::endl;
 	  }}
 
 
@@ -560,8 +567,12 @@ TH1D *recoHistVertexZ= new TH1D("recoHistVertexZ","recoHistVertexZ",70,1230,1370
                double dZLen=(end_pos.z-start_pos.z);
                double lengthPos=TMath::Sqrt(dXLen*dXLen+dYLen*dYLen+dZLen*dZLen);
 
-     if (!std::isnan(start_pos.z) && (abs(sr->mc.nu[biggestMatchIndex].prim[primaries].pdg)==211 || abs(sr->mc.nu[biggestMatchIndex].prim[primaries].pdg)==13 || abs(sr->mc.nu[biggestMatchIndex].prim[primaries].pdg)==2212)) trueTrkLen->Fill(lengthPos);
-
+     if (!std::isnan(start_pos.z) && (abs(sr->mc.nu[biggestMatchIndex].prim[primaries].pdg)==211 /*|| abs(sr->mc.nu[biggestMatchIndex].prim[primaries].pdg)==13*/ || abs(sr->mc.nu[biggestMatchIndex].prim[primaries].pdg)==2212)){ trueTrkLen->Fill(lengthPos);
+  int cc=sr->mc.nu[biggestMatchIndex].iscc;
+  int mode=sr->mc.nu[biggestMatchIndex].mode;
+  if (cc==1 && (mode==1 || mode==1001 || mode==10)) trueTrkLenQE->Fill(lengthPos);
+  if (cc==1 && (mode==3 || mode==4)) trueTrkLenNonQE->Fill(lengthPos);
+}
       if(abs(sr->mc.nu[biggestMatchIndex].prim[primaries].pdg)==2212){ trueProtonEWithRecoInt->Fill(sr->mc.nu[biggestMatchIndex].prim[primaries].p.E-0.938272); trueProtonWithRecoIntDirZ->Fill(dirZ); trueProtonWithRecoIntDirX->Fill(dirX); trueProtonWithRecoIntDirY->Fill(dirY);} 
           if(abs(sr->mc.nu[biggestMatchIndex].prim[primaries].pdg)==211){ truePionEWithRecoInt->Fill(sr->mc.nu[biggestMatchIndex].prim[primaries].p.E-0.13957);
 truePionWithRecoIntDirZ->Fill(dirZ); truePionWithRecoIntDirX->Fill(dirX); truePionWithRecoIntDirY->Fill(dirY);
@@ -684,7 +695,16 @@ if (parType<3){
                double lengthPos=TMath::Sqrt(dXLen*dXLen+dYLen*dYLen+dZLen*dZLen);
       
           double dirX=dX/length; double dirY=dY/length; double dirZ=dZ/length;
-                 if (!std::isnan(start_pos.z) && (backtracked==2212 || abs(backtracked)==13 || abs(backtracked)==211) && parType<3) selTrkLen->Fill(lengthPos);
+                 if (!std::isnan(start_pos.z) && (backtracked==2212 /*|| abs(backtracked)==13*/ || abs(backtracked)==211) && parType<3){ selTrkLen->Fill(lengthPos);
+
+  int cc=sr->mc.nu[biggestMatchIndex].iscc;
+  int mode=sr->mc.nu[biggestMatchIndex].mode;
+  if (cc==1 && (mode==1 || mode==1001 || mode==10)) selTrkLenQE->Fill(lengthPos);
+  if (cc==1 && (mode==3 || mode==4)) selTrkLenNonQE->Fill(lengthPos);
+
+
+
+}
 if (sr->mc.nu[biggestMatchIndex].targetPDG==1000180400 && backtracked==2212 && parType<3){ selProtonE->Fill(sr->mc.nu[interactionNumber].prim[partNumber].p.E-0.938272);
 selProtonDirX->Fill(dirX); selProtonDirZ->Fill(dirZ); selProtonDirY->Fill(dirY);
 
@@ -865,7 +885,10 @@ matchTrue_mult->Write();
   auto kaonDirY=new TEfficiency(*selKaonDirY,*trueKaonWithRecoIntDirY);
   auto kaonDirZ=new TEfficiency(*selKaonDirZ,*trueKaonWithRecoIntDirZ);
   auto effTrkLen=new TEfficiency(*selTrkLen,*trueTrkLen);
-  effTrkLen->Write();
+    auto effTrkLenQE=new TEfficiency(*selTrkLenQE,*trueTrkLenQE);
+  auto effTrkLenNonQE=new TEfficiency(*selTrkLenNonQE,*trueTrkLenNonQE);
+
+  effTrkLen->Write(); effTrkLenQE->Write(); effTrkLenNonQE->Write();
   protonDirX->Write(); protonDirY->Write(); protonDirZ->Write();
   pionDirX->Write(); pionDirY->Write(); pionDirZ->Write();
   kaonDirX->Write(); kaonDirY->Write(); kaonDirZ->Write();
