@@ -48,7 +48,7 @@ TCanvas c1=TCanvas();
 TLatex tL;
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-TFile fPurity("testPurity.root");
+TFile fPurity("testPurityMiniRun5.root");
 TFile fWion22("testOutputWion_22.7.root");
 TFile fWion25("testOutputWion_25.1.root");
 
@@ -63,7 +63,7 @@ diffAngle->SetTitle("All True CC #nu_{#mu}");
 diffAngle->GetXaxis()->SetTitle("Diff. True Angle (Pos.-Momentum)");
 diffAngle->GetYaxis()->SetTitleOffset(1.4);
 diffAngle->Draw("HIST");
-c1.Print("diffAngle.png");
+c1.Print("diffAngleMR5.png");
 
 
 
@@ -74,7 +74,7 @@ backtrackEl->SetTitle("Selected Interactions");
 backtrackEl->Draw("E0 HIST");
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-c1.Print("backtrackEl.png"); c1.Print("backtrackEl.pdf");
+c1.Print("backtrackElMR5.png"); c1.Print("backtrackElMR5.pdf");
 
 TH1D* backtrackCosl=(TH1D*)fPurity.Get("recoBacktrackCoslAr");
 backtrackCosl->GetXaxis()->SetTitle("True cos(#theta_{#mu})");
@@ -84,7 +84,7 @@ backtrackCosl->GetXaxis()->SetRangeUser(0.85,1);
 backtrackCosl->Draw("E0 HIST");
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-c1.Print("backtrackCosl.png"); c1.Print("backtrackCosl.pdf");
+c1.Print("backtrackCoslMR5.png"); c1.Print("backtrackCoslMR5.pdf");
 
 
 
@@ -114,7 +114,7 @@ confusionMatrix->GetYaxis()->SetTitleOffset(1.5);
 gStyle->SetPaintTextFormat("1.3f");
 confusionMatrix->Draw("COLZ TEXT");
 c1.Print("confusionMatrix.pdg");
-c1.Print("confusionMatrix.png");
+c1.Print("confusionMatrixMR5.png");
 
 TH2D* responseMatrix=(TH2D*)fPurity.Get("responseMult");
 responseMatrix->SetTitle("Response Matrix for Track Mult.");
@@ -141,7 +141,7 @@ responseMatrix->GetYaxis()->SetTitleOffset(1.2);
 gStyle->SetPaintTextFormat("1.3f");
 responseMatrix->Draw("COLZ TEXT");
 c1.Print("responseMatrix.pdg");
-c1.Print("responseMatrix.png");
+c1.Print("responseMatrixMR5.png");
 
 
 TH2D* responseMatrix22=(TH2D*)fWion22.Get("responseMult");
@@ -168,8 +168,8 @@ gPad->SetRightMargin(0.15);
 responseMatrix22->GetYaxis()->SetTitleOffset(1.2);
 gStyle->SetPaintTextFormat("1.3f");
 responseMatrix22->Draw("COLZ TEXT");
-c1.Print("responseMatrix22.pdf");
-c1.Print("responseMatrix22.png");
+c1.Print("responseMatrix22MR5.pdf");
+c1.Print("responseMatrix22MR5.png");
 
 
 
@@ -197,8 +197,8 @@ gPad->SetRightMargin(0.15);
 responseMatrixWion25->GetYaxis()->SetTitleOffset(1.2);
 gStyle->SetPaintTextFormat("1.3f");
 responseMatrixWion25->Draw("COLZ TEXT");
-c1.Print("responseMatrixWion25.pdf");
-c1.Print("responseMatrixWion25.png");
+c1.Print("responseMatrixWion25MR5.pdf");
+c1.Print("responseMatrixWion25MR5.png");
 
 
 
@@ -209,7 +209,7 @@ true_multTrkOnly->GetYaxis()->SetTitle("Number of Interactions"); true_multTrkOn
 true_multTrkOnly->Draw("E0 HIST");
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-c1.Print("true_multTrk.png"); c1.Print("true_multTrk.pdf");
+c1.Print("true_multTrkMR5.png"); c1.Print("true_multTrkMR5.pdf");
 
 
 TEfficiency* trkLenEff=(TEfficiency*)fPurity.Get("trueTrkLen_clone");
@@ -217,7 +217,7 @@ trkLenEff->SetTitle("Trk. Len (cm)");
 trkLenEff->Draw();
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-c1.Print("trueTrkLenEff.png");
+c1.Print("trueTrkLenEffMR5.png");
 
 TEfficiency* protonEff=(TEfficiency*)fPurity.Get("trueProtonEWithRecoInt_clone");
 TH1D* denomWion25=(TH1D*)fWion25.Get("trueProtonEWithRecoInt");
@@ -255,7 +255,7 @@ protonEff->Draw("SAME");
 //lSyst2->Draw("SAME");
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-c1.Print("protonEff.png");
+c1.Print("protonEffMR5.png");
 
 
 TEfficiency* pionEff=(TEfficiency*)fPurity.Get("truePionEWithRecoInt_clone");
@@ -282,14 +282,14 @@ pionEff->Draw("SAME");
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
 //lSyst2->Draw("SAME");
-c1.Print("pionEff.png");
+c1.Print("pionEffMR5.png");
 
 TEfficiency* pionDirX=(TEfficiency*)fPurity.Get("truePionWithRecoIntDirX_clone");
 pionDirX->SetTitle("Pion Eff. for cos(#theta_{X})");
 pionDirX->Draw();
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-c1.Print("pionDirX.png");
+c1.Print("pionDirXMR5.png");
 
 
 TEfficiency* pionDirY=(TEfficiency*)fPurity.Get("truePionWithRecoIntDirY_clone");
@@ -297,7 +297,7 @@ pionDirY->SetTitle("Pion Eff. for cos(#theta_{Y})");
 pionDirY->Draw();
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-c1.Print("pionDirY.png");
+c1.Print("pionDirYMR5.png");
 
 
 TEfficiency* pionDirZ=(TEfficiency*)fPurity.Get("truePionWithRecoIntDirZ_clone");
@@ -305,7 +305,7 @@ pionDirZ->SetTitle("Pion Eff. for cos(#theta_{Z})");
 pionDirZ->Draw();
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-c1.Print("pionDirZ.png");
+c1.Print("pionDirZMR5.png");
 
 
 TEfficiency* protonDirX=(TEfficiency*)fPurity.Get("trueProtonWithRecoIntDirX_clone");
@@ -313,7 +313,7 @@ protonDirX->SetTitle("Proton Eff. for cos(#theta_{X})");
 protonDirX->Draw();
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-c1.Print("protonDirX.png");
+c1.Print("protonDirXMR5.png");
 
 
 TEfficiency* protonDirY=(TEfficiency*)fPurity.Get("trueProtonWithRecoIntDirY_clone");
@@ -321,7 +321,7 @@ protonDirY->SetTitle("Proton Eff. for cos(#theta_{Y})");
 protonDirY->Draw();
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-c1.Print("protonDirY.png");
+c1.Print("protonDirYMR5.png");
 
 
 TEfficiency* protonDirZ=(TEfficiency*)fPurity.Get("trueProtonWithRecoIntDirZ_clone");
@@ -329,7 +329,7 @@ protonDirZ->SetTitle("Proton Eff. for cos(#theta_{Z})");
 protonDirZ->Draw();
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-c1.Print("protonDirZ.png");
+c1.Print("protonDirZMR5.png");
 
 
 
@@ -365,7 +365,7 @@ track_multWion22->Draw("HIST SAME");
   lSyst->AddEntry(track_multWion22,"W_{ion}=22.7 eV","l");
   lSyst->Draw("SAME");
     
-c1.Print("track_multWionSyst.png"); c1.Print("track_multWionSyst.pdf");
+c1.Print("track_multWionSystMR5.png"); c1.Print("track_multWionSystMR5.pdf");
 
 
 
@@ -434,23 +434,22 @@ track_mult->Draw("E0 HIST");
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
 
-c1.Print("track_mult.png"); c1.Print("track_mult.pdf");
+c1.Print("track_multMR5.png"); c1.Print("track_multMR5.pdf");
 
 
 
 
-track_mult->GetYaxis()->SetRangeUser(0,6000);
+track_mult->GetYaxis()->SetRangeUser(0,2000);
 track_mult->SetLineWidth(0); track_mult->GetXaxis()->SetRangeUser(0,10);
 track_mult->Draw("HIST");
 track_mult->GetXaxis()->SetTitle("Number of Reconstructed Tracks");
 track_mult->GetYaxis()->SetTitle("Number of Interactions");
 track_mult->SetTitle("Selected Interactions");
-track_mult->GetYaxis()->SetTitleOffset(1.3);
 h1d_track->Draw("SAME");
 lTrack->Draw("SAME");
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-c1.Print("track_multStack.png"); c1.Print("track_multStack.pdf");
+c1.Print("track_multStackMR5.png"); c1.Print("track_multStackMR5.pdf");
 track_mult->SetLineWidth(track_multGood->GetLineWidth());
 
 
@@ -507,7 +506,7 @@ relativeErrorStat->Draw("HIST SAME");
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
 
-c1.Print("relativeError.png"); c1.Print("relativeError.pdf");
+c1.Print("relativeErrorMR5.png"); c1.Print("relativeErrorMR5.pdf");
 
 
 
@@ -520,7 +519,7 @@ track_mult->SetTitle("Selected Int.: Prelim. Errors");
 track_mult->Draw("E0 HIST");
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-c1.Print("track_multPrelimErr.png"); c1.Print("track_multPrelimErr.pdf");
+c1.Print("track_multPrelimErrMR5.png"); c1.Print("track_multPrelimErrMR5.pdf");
 track_mult->Scale(5.71);
 rwTracks->Scale(5.71);
 for (int i=2; i<11; i++){
@@ -540,7 +539,7 @@ relativeErrorStat->Draw("HIST");
 //relativeErrorStat->Draw("HIST SAME");
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-c1.Print("relativeError20days.png"); c1.Print("relativeError20days.pdf");
+c1.Print("relativeError20daysMR5.png"); c1.Print("relativeError20daysMR5.pdf");
 
 
 for (int i=2; i<11; i++){
@@ -557,7 +556,7 @@ relativeErrorStat->Draw("HIST");
 //relativeErrorStat->Draw("HIST SAME");
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-   c1.Print("relativeError20daysBadTrkEff.png"); c1.Print("relativeError20daysBadTrkEff.pdf");
+   c1.Print("relativeError20daysBadTrkEffMR5.png"); c1.Print("relativeError20daysBadTrkEffMR5.pdf");
 
 
 
@@ -572,7 +571,7 @@ track_mult->Draw("E0 HIST");
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
 
-c1.Print("track_mult20daysStat.png"); c1.Print("track_mult20daysStat.pdf");
+c1.Print("track_mult20daysStatMR5.png"); c1.Print("track_mult20daysStatMR5.pdf");
 
 
 
@@ -591,7 +590,7 @@ rockWithoutMNV->SetMarkerColor(kRed);
 rockWithoutMNV->Draw("E0 P");
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-c1.Print("rockWithoutMNV.png"); c1.Print("rockWithoutMNV.pdf");
+c1.Print("rockWithoutMNVMR5.png"); c1.Print("rockWithoutMNVMR5.pdf");
 
 
 TH1D* track_multWithoutMNV=(TH1D*)fBad.Get("track_mult");
@@ -606,7 +605,7 @@ track_multWithoutMNV->SetTitle("Without Using MINERvA");
 track_multWithoutMNV->Draw("E0 HIST");
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-c1.Print("track_multWithoutMNV.png"); c1.Print("track_multWithoutMNV.pdf");
+c1.Print("track_multWithoutMNVMR5.png"); c1.Print("track_multWithoutMNVMR5.pdf");
 
 
 TH1D* deltaX=(TH1D*)fMinerva.Get("deltaX");
@@ -674,12 +673,12 @@ deltaYUS->GetYaxis()->SetTitleOffset(1.4);
 deltaXUS->Draw("E0 P");
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-c1.Print("deltaXUS.png"); c1.Print("deltaXUS.pdf");
+c1.Print("deltaXUSMR5.png"); c1.Print("deltaXUSMR5.pdf");
 
 deltaYUS->Draw("E0 P");
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-c1.Print("deltaYUS.png"); c1.Print("deltaYUS.pdf");
+c1.Print("deltaYUSMR5.png"); c1.Print("deltaYUSMR5.pdf");
 
 
 
@@ -687,7 +686,7 @@ c1.Print("deltaYUS.png"); c1.Print("deltaYUS.pdf");
 dotProductUS->Draw("E0 P");
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-c1.Print("dotProductUS.png"); c1.Print("dotProductUS.pdf");
+c1.Print("dotProductUSMR5.png"); c1.Print("dotProductUSMR5.pdf");
 
 
 
@@ -744,49 +743,49 @@ deltaYBad->GetYaxis()->SetTitle("Number of Tracks");
 deltaX->Draw("E0 P");
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-c1.Print("deltaX.png"); c1.Print("deltaX.pdf");
+c1.Print("deltaXMR5.png"); c1.Print("deltaXMR5.pdf");
 
 deltaY->Draw("E0 P");
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-c1.Print("deltaY.png"); c1.Print("deltaY.pdf");
+c1.Print("deltaYMR5.png"); c1.Print("deltaYMR5.pdf");
 
 
 deltaXGood->Draw("E0 P");
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-c1.Print("deltaXGood.png"); c1.Print("deltaXGood.pdf");
+c1.Print("deltaXGoodMR5.png"); c1.Print("deltaXGoodMR5.pdf");
 
 
 deltaYGood->Draw("E0 P");
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-c1.Print("deltaYGood.png"); c1.Print("deltaYGood.pdf");
+c1.Print("deltaYGoodMR5.png"); c1.Print("deltaYGoodMR5.pdf");
 
 
 
 deltaXBad->Draw("E0 P");
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-c1.Print("deltaXBad.png"); c1.Print("deltaXBad.pdf");
+c1.Print("deltaXBadMR5.png"); c1.Print("deltaXBadMR5.pdf");
 
 
 deltaYBad->Draw("E0 P");
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-c1.Print("deltaYBad.png"); c1.Print("deltaYBad.pdf");
+c1.Print("deltaYBadMR5.png"); c1.Print("deltaYBadMR5.pdf");
 
 dotProduct->GetYaxis()->SetTitleOffset(1.4);
 dotProduct->Draw("E0 P");
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-c1.Print("dotProduct.png"); c1.Print("dotProduct.pdf");
+c1.Print("dotProductMR5.png"); c1.Print("dotProductMR5.pdf");
 
 
 dotProductGood->Draw("E0 P");
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-c1.Print("dotProductGood.png"); c1.Print("dotProductGood.pdf");
+c1.Print("dotProductGoodMR5.png"); c1.Print("dotProductGoodMR5.pdf");
 
 track_mult->GetYaxis()->SetRangeUser(0,1000);
 track_mult->SetLineWidth(0); track_mult->GetXaxis()->SetRangeUser(0,10);
@@ -795,14 +794,14 @@ h1d_track->Draw("SAME");
 lTrack->Draw("SAME");
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-c1.Print("track_multStack20.png"); c1.Print("track_multStack20.pdf");
+c1.Print("track_multStack20MR5.png"); c1.Print("track_multStack20MR5.pdf");
 track_mult->SetLineWidth(track_multGood->GetLineWidth());
 
 
 track_multGood->Draw("E0 HIST");
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-c1.Print("track_multGood.png"); c1.Print("track_multGood.pdf");
+c1.Print("track_multGoodMR5.png"); c1.Print("track_multGoodMR5.pdf");
 
 
 track_mult->SetLineWidth(0); track_mult->GetXaxis()->SetRangeUser(0,10); track_mult->SetTitle("Scaled to 1 Day");
@@ -847,7 +846,7 @@ h1d_track2->Draw("SAME HIST");
 lTrack->Draw("SAME");
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-c1.Print("track_multStack1Day.png"); c1.Print("track_multStack1Day.pdf");
+c1.Print("track_multStack1DayMR5.png"); c1.Print("track_multStack1DayMR5.pdf");
 track_mult->SetLineWidth(track_multGood->GetLineWidth());
 
 track_mult->SetLineWidth(0); track_mult->GetXaxis()->SetRangeUser(0,10); track_mult->SetTitle("Sel. Int.: 20 Days");
@@ -900,7 +899,7 @@ lTrack->Draw("SAME");
 c1.SetLogy();
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-c1.Print("track_multStack20Days.png"); c1.Print("track_multStack20Days.pdf");
+c1.Print("track_multStack20DaysMR5.png"); c1.Print("track_multStack20DaysMR5.pdf");
 track_mult->SetLineWidth(track_multGood->GetLineWidth());
 
 
@@ -949,7 +948,7 @@ h1d_track4->Draw("SAME HIST");
 lTrack->Draw("SAME");
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-c1.Print("track_multStackRockTimes2.png"); c1.Print("track_multStackRockTimes2.pdf");
+c1.Print("track_multStackRockTimes2MR5.png"); c1.Print("track_multStackRockTimes2MR5.pdf");
 track_mult->SetLineWidth(track_multGood->GetLineWidth());
 
 
@@ -967,7 +966,7 @@ rock->GetYaxis()->CenterTitle();
 rock->Draw("E0 P");
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-c1.Print("rock.png"); c1.Print("rock.pdf");
+c1.Print("rockMR5.png"); c1.Print("rockMR5.pdf");
 
 
 }
