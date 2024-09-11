@@ -9,7 +9,7 @@
 #include <string>
 #include "duneanaobj/StandardRecord/StandardRecord.h" //Ideally, this should be SRProxy.h, but there is an include error for that now. Alternatively, you can use SetBranchStatus function in TreeLoader, but it does not work for the common branch (to do)
 
-double minTrkLength=1;
+double minTrkLength=2;
 double signed3dDistance(double firstPoint1, double firstPoint2, double firstPoint3, double secondPoint1, double secondPoint2, double secondPoint3, TVector3 point){
 
 double denominator = sqrt( (secondPoint2-firstPoint2)*(secondPoint2-firstPoint2) + (secondPoint1-firstPoint1)*(secondPoint1-firstPoint1)+ (secondPoint3-firstPoint3)*(secondPoint3-firstPoint3));
@@ -31,7 +31,7 @@ return numerator/denominator;
 
 }
 
-int caf_plotter(std::string input_file_list, std::string output_rootfile){
+int caf_plotter(std::string input_file_list, std::string output_rootfile, bool mcOnly){
   double minLength=0; int goodIntNum=0; int badIntNum=0; int goodIntInFidVol=0; int badIntInFidVol=0;
 int goodMINERvAMatch=0; int totalMINERvAMatch=0; 
  double offset=0;
@@ -81,9 +81,9 @@ TH1D *recoHistVertexZ= new TH1D("recoHistVertexZ","recoHistVertexZ",70,1230,1370
  TH1D* minervaMatchPDG=new TH1D("minervaMatchPDG","minervaMatchPDG",6000,-3000,3000);
  TH1D* minervaMatchE=new TH1D("minervaMatchE","minervaMatchE",50,0,20);
  TH1D* minervaMatchCos=new TH1D("minervaMatchCos","minervaMatchCos",100,-1,1);
- TH1D* selPionE=new TH1D("selPionE","selPionE",10,0,0.1);
- TH1D* selProtonE=new TH1D("selProtonE","selProtonE",10,0,0.1);
- TH1D* selKaonE=new TH1D("selKaonE","selKaonE",10,0,0.1);
+ TH1D* selPionE=new TH1D("selPionE","selPionE",15,0,0.2);
+ TH1D* selProtonE=new TH1D("selProtonE","selProtonE",15,0,0.2);
+ TH1D* selKaonE=new TH1D("selKaonE","selKaonE",15,0,0.2);
 
  TH1D* selPionDirX=new TH1D("selPionDirX","selPionDirX",20,-1,1);
  TH1D* selPionDirY=new TH1D("selPionDirY","selPionDirY",20,-1,1);
@@ -120,9 +120,9 @@ TH1D *recoHistVertexZ= new TH1D("recoHistVertexZ","recoHistVertexZ",70,1230,1370
  TH1D* containPLen=new TH1D("containP","containP",100,0,20); 
 
 
- TH1D* truePionEWithRecoInt=new TH1D("truePionEWithRecoInt","truePionEWithRecoInt",10,0,0.1);
- TH1D* trueProtonEWithRecoInt=new TH1D("trueProtonEWithRecoInt","trueProtonEWithRecoInt",10,0,0.1);
- TH1D* trueKaonEWithRecoInt=new TH1D("trueKaonEWithRecoInt","trueKaonEWithRecoInt",10,0,0.1);
+ TH1D* truePionEWithRecoInt=new TH1D("truePionEWithRecoInt","truePionEWithRecoInt",15,0,0.2);
+ TH1D* trueProtonEWithRecoInt=new TH1D("trueProtonEWithRecoInt","trueProtonEWithRecoInt",15,0,0.2);
+ TH1D* trueKaonEWithRecoInt=new TH1D("trueKaonEWithRecoInt","trueKaonEWithRecoInt",15,0,0.2);
 
 TH1D* trueTrkLenQE=new TH1D("trueTrkLenQE","trueTrkLenQE",20,0,10);
 TH1D* trueTrkLenNonQE=new TH1D("trueTrkLenNonQE","trueTrkLenNonQE",20,0,10);
@@ -214,19 +214,15 @@ TH1D* trueTrkLen=new TH1D("trueTrkLen","trueTrkLen",20,0,10);
   auto sr = new caf::StandardRecord;
   caf_chain->SetBranchAddress("rec", &sr);
 
-  std::vector<double> goodEvents={1,7,24,30,50,122,131,142,143,163,210,226,267,272,275,276,339,378,395,442,497,502,517,530,534,597,599,617,655,699,707,787,845,849,898,921,942,948,966,968,986,998,1048,1056,1059,1076,1077,1079,1154,1168,1207};
-
-
   bool skipEvent=false;
-  for(long n = 0; n < Nentries; ++n){ //Loop over spills/triggers
-//if(std::find(goodEvents.begin(), goodEvents.end(), n) != goodEvents.end()){}
-//else continue;
+  for(long n = 0; n < Nentries; ++n){ 
         double trueVtxX=-9999; double trueVtxY=-999; double trueVtxZ=-9999;
         skipEvent=false;
 	if(n%10000 == 0) std::cout << Form("Processing trigger %ld of %ld", n, Nentries) << std::endl;
 	caf_chain->GetEntry(n); //Get spill from tree
        bool hasANeutrino=false;
-
+       double mnvOffsetX=-10; double mnvOffsetY=5;
+       if (mcOnly){ mnvOffsetX=0; mnvOffsetY=0;
        for(long unsigned ntrue=0; ntrue<sr->mc.nu.size(); ntrue++){ 
        auto vertex=sr->mc.nu[ntrue].vtx;
        trueVtxX=vertex.x; trueVtxY=vertex.y; trueVtxZ=vertex.z;
@@ -236,10 +232,9 @@ TH1D* trueTrkLen=new TH1D("trueTrkLen","trueTrkLen",20,0,10);
        if (sr->mc.nu[ntrue].targetPDG!=1000180400) continue;
        if (sr->mc.nu[ntrue].iscc==false) continue;
        if (abs(sr->mc.nu[ntrue].pdg)!=14) continue; 
-       if (abs(sr->mc.nu[ntrue].vtx.x)>53 || abs(sr->mc.nu[ntrue].vtx.x)<12) continue;
-       if (abs(sr->mc.nu[ntrue].vtx.z)>53 || abs(sr->mc.nu[ntrue].vtx.z)<12) continue;
-       if (abs(sr->mc.nu[ntrue].vtx.y)>53) continue;    
-  //std::cout<<"True Vertex Location of Argon Interaction: "<<trueVtxX<<","<<trueVtxY<<","<<trueVtxZ<<std::endl;
+       if (abs(sr->mc.nu[ntrue].vtx.x)>59 || abs(sr->mc.nu[ntrue].vtx.x)<5) continue;
+       if (abs(sr->mc.nu[ntrue].vtx.z)>59.5 || abs(sr->mc.nu[ntrue].vtx.z)<5) continue;
+       if (abs(sr->mc.nu[ntrue].vtx.y)>57) continue;    
        int npip=sr->mc.nu[ntrue].npip;
        int npim=sr->mc.nu[ntrue].npim;
        int np=sr->mc.nu[ntrue].nproton;
@@ -305,63 +300,48 @@ TH1D* trueTrkLen=new TH1D("trueTrkLen","trueTrkLen",20,0,10);
      escapePi->Fill(escapingPions); nPi->Fill(nPion); nP->Fill(nProton); true_mult->Fill(truePart); if (truePartTrkOnly>0) true_multTrkOnly->Fill(truePartTrkOnly);    true_multGENIE->Fill(truePartNoG4);
        responseGenieToG4->Fill(truePart,truePartTrkOnly);
        hasANeutrino=true;  
-  }
-    //for(long unsigned nixn=0; nixn<sr  
-
-  //if (hasANeutrino==false) continue;
-
-        
+  }} 
         int rock=0;
         bool goodInteraction=false;   
         std::vector<int> trueInteractionIndex;
         std::vector<int> primaryTrkIndex;
 	
 	for(long unsigned nixn = 0; nixn < sr->common.ixn.dlp.size(); nixn++){
+          
       	  bool oneContained=false; bool oneNotContained=false; goodInteraction=false;
           double biggestMatch=-999; int biggestMatchIndex=-999; double maxDotProductDS=-999; double maxDotProductUS=-999;
             int maxEventPar=-999; int maxEventTyp=-9999; int maxEventIxn=-999;
            double dirZExiting=-999;   double startZMuonCand=-999;
+
+          double recoVertexX=sr->common.ixn.dlp[nixn].vtx.x; double recoVertexY=sr->common.ixn.dlp[nixn].vtx.y; double recoVertexZ=sr->common.ixn.dlp[nixn].vtx.z;
+          if (/*abs(abs(sr->common.ixn.dlp[nixn].vtx.x)-33)<1 || */ abs(sr->common.ixn.dlp[nixn].vtx.x)>59 || abs(sr->common.ixn.dlp[nixn].vtx.x)<5 || abs(sr->common.ixn.dlp[nixn].vtx.y)>57 || abs(sr->common.ixn.dlp[nixn].vtx.z)<5 || abs(sr->common.ixn.dlp[nixn].vtx.z)>59.5)  continue;
+           recoVertex2DNoCuts->Fill(sr->common.ixn.dlp[nixn].vtx.x,sr->common.ixn.dlp[nixn].vtx.z);
+        
+
+        if (mcOnly){
+       
         for (int ntruth=0; ntruth<sr->common.ixn.dlp[nixn].truth.size(); ntruth++){
           
           if (biggestMatch<sr->common.ixn.dlp[nixn].truthOverlap.at(ntruth)){
-          
           biggestMatch=sr->common.ixn.dlp[nixn].truthOverlap.at(ntruth);
           biggestMatchIndex=sr->common.ixn.dlp[nixn].truth.at(ntruth);
-           //std::cout<<"Biggest Match: "<<biggestMatch<<std::endl;
-
-
 		}
 		}
-          //std::cout<<biggestMatchIndex<<","<<sr->common.ixn.dlp[nixn].truth.at(ntruth)<<std::endl;
-          if (sr->mc.nu[biggestMatchIndex].id>1E9){ rock=1; 
-	
-	}
-	
-          double recoVertexX=sr->common.ixn.dlp[nixn].vtx.x; double recoVertexY=sr->common.ixn.dlp[nixn].vtx.y; double recoVertexZ=sr->common.ixn.dlp[nixn].vtx.z;
-        
-
-
+          if (sr->mc.nu[biggestMatchIndex].id>1E9){ rock=1; }
 	  trueVtxX=sr->mc.nu[biggestMatchIndex].vtx.x; trueVtxY=sr->mc.nu[biggestMatchIndex].vtx.y; trueVtxZ=sr->mc.nu[biggestMatchIndex].vtx.z;
-           //if (rock==1) std::cout<<" Checking rock vertex is now a number: "<<trueVtxZ<<std::endl;
-//        if (rock==0) std::cout<<recoVertexX<<","<<recoVertexY<<","<<recoVertexZ<<","<<trueVtxX<<","<<trueVtxY<<","<<trueVtxZ<<std::endl;
-	  if (abs(sr->mc.nu[biggestMatchIndex].pdg)==14 && abs(sr->mc.nu[biggestMatchIndex].iscc)==true  && sr->mc.nu[biggestMatchIndex].targetPDG==1000180400 &&  abs(recoVertexX-trueVtxX)<5 && abs(recoVertexY-trueVtxY)<5 && abs(recoVertexZ-trueVtxZ)<5 && abs(trueVtxX)>12 && abs(trueVtxX)<53 && abs(trueVtxZ)>12 && abs(trueVtxZ)<53 && abs(trueVtxY)<53) goodInteraction=true;
+         
+	  if (abs(sr->mc.nu[biggestMatchIndex].pdg)==14 && abs(sr->mc.nu[biggestMatchIndex].iscc)==true  && sr->mc.nu[biggestMatchIndex].targetPDG==1000180400 &&  abs(recoVertexX-trueVtxX)<5 && abs(recoVertexY-trueVtxY)<5 && abs(recoVertexZ-trueVtxZ)<5 && abs(trueVtxX)>5 && abs(trueVtxX)<59 && abs(trueVtxZ)>5 && abs(trueVtxZ)<59.5 && abs(trueVtxY)<57) goodInteraction=true;
          recoHistVertexY->Fill(sr->common.ixn.dlp[nixn].vtx.y); recoHistVertexX->Fill(sr->common.ixn.dlp[nixn].vtx.x); recoHistVertexZ->Fill(sr->common.ixn.dlp[nixn].vtx.z);
          if (goodInteraction==true) goodIntNum++; else badIntNum++;
-	 if (abs(abs(sr->common.ixn.dlp[nixn].vtx.x)-33)<1.5 || abs(sr->common.ixn.dlp[nixn].vtx.x)>53 || abs(sr->common.ixn.dlp[nixn].vtx.x)<12 || abs(sr->common.ixn.dlp[nixn].vtx.y)>53 || abs(sr->common.ixn.dlp[nixn].vtx.z)<12 || abs(sr->common.ixn.dlp[nixn].vtx.z)>53)  continue; 
+
           trueInteractionIndex.push_back(biggestMatchIndex);
 
           if (goodInteraction==true) goodIntInFidVol++; else badIntInFidVol++;
-                recoVertex2D->Fill(sr->common.ixn.dlp[nixn].vtx.x,sr->common.ixn.dlp[nixn].vtx.z);
-
- 
-       //std::cout<<"counting protons and kaons"<<std::endl;
-
-      //std::cout<<"Done counting"<<std::endl;
-       
 
 
 
-
+	 }
+	 
                 int partMult=0;
                 int partMultTrkOnly=0;
                 bool hasAtLeastOneProton=false;
@@ -371,11 +351,10 @@ TH1D* trueTrkLen=new TH1D("trueTrkLen","trueTrkLen",20,0,10);
                 int correctTrack=2;
                 int correctShower=2;
 		 double longestTrk=-9999;
-    int trackMult=0;  int trackMultExit=0; int minervaTracks=0; int minervaThrough=0; 
+      int trackMult=0;  int trackMultExit=0; int minervaTracks=0; int minervaThrough=0; 
   	for(long unsigned npart=0; npart < sr->common.ixn.dlp[nixn].part.dlp.size(); npart++){ //loop over particles
- 	//std::cout<<"Containment variable: "<<sr->common.ixn.dlp[nixn].part.dlp[npart].contained<<std::endl;
-                if (!sr->common.ixn.dlp[nixn].part.dlp[npart].primary) continue; 
-               int pdg=sr->common.ixn.dlp[nixn].part.dlp[npart].pdg;
+        if (!sr->common.ixn.dlp[nixn].part.dlp[npart].primary) continue; 
+        int pdg=sr->common.ixn.dlp[nixn].part.dlp[npart].pdg;
 	if ( (abs(pdg)==2212 || abs(pdg)==13 || abs(pdg)==211 || abs(pdg)==321)){
 	if (sr->common.ixn.dlp[nixn].part.dlp[npart].primary==true) trackCorrectness->Fill(correctTrack);
 
@@ -399,7 +378,7 @@ TH1D* trueTrkLen=new TH1D("trueTrkLen","trueTrkLen",20,0,10);
         if (sr->common.ixn.dlp[nixn].part.dlp[npart].primary==true && length>minTrkLength){   
 		partMult++;
                 trackMult++;
-           if    ((start_pos.z)>58 || (end_pos.z)>58) trackMultExit++; 
+        if    ((start_pos.z)>60 || (end_pos.z)>60) trackMultExit++; 
 		int maxPartMinerva=-999; int maxTypeMinerva=-999;  
                   int maxIxnMinerva=-999;
 		int maxPartMinervaUS=-999; int maxTypeMinervaUS=-999;      
@@ -419,7 +398,7 @@ TH1D* trueTrkLen=new TH1D("trueTrkLen","trueTrkLen",20,0,10);
                 
 
 
-		if (start_z>0 && ((start_pos.z)>58 || (end_pos.z)>58) ){
+		if (start_z>0 && ((start_pos.z)>60 || (end_pos.z)>60) ){
 		int truthPart=sr->nd.minerva.ixn[i].tracks[j].truth[0].part;
 		double dXMnv=(sr->nd.minerva.ixn[i].tracks[j].end.x-sr->nd.minerva.ixn[i].tracks[j].start.x);
 		double dYMnv=(sr->nd.minerva.ixn[i].tracks[j].end.y-sr->nd.minerva.ixn[i].tracks[j].start.y);
@@ -436,13 +415,15 @@ TH1D* trueTrkLen=new TH1D("trueTrkLen","trueTrkLen",20,0,10);
 		double diffExtrap=TMath::Sqrt(TMath::Power(extrapY-start_y,2));
 
 
-		if (dotProductDS<dotProduct && abs(extrapY)<10 && abs(TMath::ATan(dirXMinerva/dirZMinerva)-TMath::ATan(dirX/dirZ))<0.06 && abs(TMath::ATan(dirYMinerva/dirZMinerva)-TMath::ATan(dirY/dirZ))<0.06 && abs(extrapX)<10){ dotProductDS=dotProduct;
+		if (dotProductDS<dotProduct && abs(extrapY-mnvOffsetY)<15  && abs(TMath::ATan(dirXMinerva/dirZMinerva)-TMath::ATan(dirX/dirZ))<0.06 && abs(TMath::ATan(dirYMinerva/dirZMinerva)-TMath::ATan(dirY/dirZ))<0.06 && abs(extrapX-mnvOffsetX)<15){ dotProductDS=dotProduct;
 		deltaExtrapY=extrapY;
 		deltaExtrapX=extrapX;
-		maxPartMinerva=sr->nd.minerva.ixn[i].tracks[j].truth[0].part;
+		dirZExiting=dirZ;
+		if (mcOnly){
+                maxPartMinerva=sr->nd.minerva.ixn[i].tracks[j].truth[0].part;
 		maxTypeMinerva=sr->nd.minerva.ixn[i].tracks[j].truth[0].type;
-                maxIxnMinerva=sr->nd.minerva.ixn[i].tracks[j].truth[0].ixn;	
-		if (end_z>300){ minervaPass=1; if(dirZExiting<dirZ) dirZExiting=dirZ;}
+                maxIxnMinerva=sr->nd.minerva.ixn[i].tracks[j].truth[0].ixn;}	
+		//if (end_z>300){ minervaPass=1;} if(dirZExiting<dirZ){ dirZExiting=dirZ;}
                 }}
 
 		if (start_z<0 && end_z>0 && ( (start_pos.z<-58 && end_pos.z>58) || (start_pos.z>58 && end_pos.z<-58))){
@@ -461,13 +442,13 @@ TH1D* trueTrkLen=new TH1D("trueTrkLen","trueTrkLen",20,0,10);
 		double extrapXUS=dirX/dirZ*(extrapdZUS)+end_pos.x-end_x;
 		
                 //double diffExtrap=TMath::Sqrt(TMath::Power(extrapY-end_y,2));
-		if (dotProductUS<dotProduct  && abs(extrapYUS)<10 && abs(extrapXUS)<10 && abs(TMath::ATan(dirXMinerva/dirZMinerva)-TMath::ATan(dirX/dirZ))<0.06 && abs(TMath::ATan(dirYMinerva/dirZMinerva)-TMath::ATan(dirY/dirZ))<0.06) dotProductUS=dotProduct;
+		if (dotProductUS<dotProduct  && abs(extrapYUS-mnvOffsetY)<15 && abs(extrapXUS-mnvOffsetX)<15 && abs(TMath::ATan(dirXMinerva/dirZMinerva)-TMath::ATan(dirX/dirZ))<0.06 && abs(TMath::ATan(dirYMinerva/dirZMinerva)-TMath::ATan(dirY/dirZ))<0.06) dotProductUS=dotProduct;
 		deltaExtrapYUS=extrapYUS;
                 deltaExtrapXUS=extrapXUS;
-		maxPartMinervaUS=sr->nd.minerva.ixn[i].tracks[j].truth[0].part;
+		if (mcOnly){
+                maxPartMinervaUS=sr->nd.minerva.ixn[i].tracks[j].truth[0].part;
 		maxTypeMinervaUS=sr->nd.minerva.ixn[i].tracks[j].truth[0].type;	
-//if (maxPartMinervaUS==maxPartNumber) std::cout<<extrapdZ<<","<<dirY/dirZ*(extrapdZ)<<","<<double(dirX/dirZ*(extrapdZ))<<","<<end_y<<","<<end_x<<std::endl;
-
+                }
 
 		}
 
@@ -478,42 +459,12 @@ TH1D* trueTrkLen=new TH1D("trueTrkLen","trueTrkLen",20,0,10);
         maxEventTyp=maxTypeMinerva;
         maxEventIxn=maxIxnMinerva;
 	}
-	 if (dotProductDS>0.9975){  minervaTracks++; if (minervaPass==1){ minervaThrough++;
+	 if (dotProductDS>0.99){  minervaTracks++; if (minervaPass==1){ minervaThrough++;
              startZMuonCand=start_pos.z; if (start_pos.z>end_pos.z) startZMuonCand=end_pos.z;
-
-
-/*
-          if (maxEventTyp==1){  minervaMatchPDG->Fill(sr->mc.nu[maxEventIxn].prim[maxEventPar].pdg); int minervaPDG=sr->mc.nu[maxEventIxn].prim[maxEventPar].pdg;
-         if (abs(minervaPDG)==13){ minervaMatchE->Fill(sr->mc.nu[maxEventIxn].prim[maxEventPar].p.E);
-               auto start_posMnv=sr->mc.nu[maxEventIxn].prim[maxEventPar].start_pos;
-       auto end_posMnv=sr->mc.nu[maxEventIxn].prim[maxEventPar].end_pos;
-       if (!std::isnan(start_posMnv.z)){
-       double dX=(end_posMnv.x-start_posMnv.x);
-       double dY=(end_posMnv.y-start_posMnv.y);
-       double dZ=(end_posMnv.z-start_posMnv.z);
-       double length=TMath::Sqrt(dX*dX+dY*dY+dZ*dZ);
-       double cosL=dZ/length;
-       //   minervaMatchCos->Fill(cosL);
-       std::cout<<startZ<<","<<start_posMnv.z<<std::endl;}}}*/
-       //
-/*
-          if (maxEventTyp==1){  minervaMatchPDG->Fill(sr->mc.nu[maxEventIxn].prim[maxEventPar].pdg); int minervaPDG=sr->mc.nu[maxEventIxn].prim[maxEventPar].pdg;
-         if (abs(pdg)==13){ minervaMatchE->Fill(sr->mc.nu[maxEventIxn].prim[maxEventPar].p.E);
-               auto start_pos=sr->mc.nu[maxEventIxn].prim[maxEventPar].start_pos;
-       auto end_pos=sr->mc.nu[maxEventIxn].prim[maxEventPar].end_pos;
-       if (!std::isnan(start_pos.z)){
-       double dX=abs(end_pos.x-start_pos.x);
-       double dY=abs(end_pos.y-start_pos.y);
-       double dZ=abs(end_pos.z-start_pos.z);
-       double length=TMath::Sqrt(dX*dX+dY*dY+dZ*dZ);
-       double cosL=dZ/length;
-          minervaMatchCos->Fill(cosL); 
-
-		}}}*/
          }
 	} 
 	if (dotProductUS>maxDotProductUS) maxDotProductUS=dotProductUS;
-	 if (dotProductUS>0.9975){   
+	 if (dotProductUS>0.99){   
 /*		if (maxPartNumber==maxPartMinervaUS && maxTypeMinervaUS==maxTypeNumber){ deltaYGoodUS->Fill(deltaExtrapYUS); deltaXGoodUS->Fill(deltaExtrapXUS); goodMINERvAMatchUS++;} 
               else{ deltaYBadUS->Fill(deltaExtrapYUS); deltaXBadUS->Fill(deltaExtrapXUS); }
        totalMINERvAMatchUS++;       
@@ -523,11 +474,13 @@ TH1D* trueTrkLen=new TH1D("trueTrkLen","trueTrkLen",20,0,10);
 //else oneContained=true;
 		} // primary of particle greater than 5
 		  } } // particles
-	if (/*minervaTracks>1 ||*/ minervaThrough<1 ||  maxDotProductDS<0.9975) continue;
-//	if (maxDotProductUS>0.9999) continue;
+	if ( /*minervaThrough<1  ||*/  maxDotProductDS<0.99) continue;
+          recoCosL->Fill(dirZExiting); 
+           recoVertex2D->Fill(sr->common.ixn.dlp[nixn].vtx.x,sr->common.ixn.dlp[nixn].vtx.z);
 
-        
 
+
+if (mcOnly){
           if (maxEventTyp==1){  minervaMatchPDG->Fill(sr->mc.nu[maxEventIxn].prim[maxEventPar].pdg); int minervaPDG=sr->mc.nu[maxEventIxn].prim[maxEventPar].pdg;
          if (abs(minervaPDG)==13){ minervaMatchE->Fill(sr->mc.nu[maxEventIxn].prim[maxEventPar].p.E);
                auto start_posMnv=sr->mc.nu[maxEventIxn].prim[maxEventPar].start_pos;
@@ -734,7 +687,7 @@ else backtracked=-1;
 }
 int trueMatchMult=0;
        if (trackMult>0 && trackMultExit>0 /*&& oneContained && oneNotContained*/){  
-        recoCosL->Fill(dirZExiting); 
+       // recoCosL->Fill(dirZExiting); 
       if (goodInteraction){ recoBacktrackCCAr->Fill(sr->mc.nu[biggestMatchIndex].iscc);
 recoBacktrackPDGAr->Fill(sr->mc.nu[biggestMatchIndex].pdg);
        if (sr->mc.nu[biggestMatchIndex].iscc && abs(sr->mc.nu[biggestMatchIndex].pdg)==14){
@@ -772,7 +725,7 @@ if (!goodInteraction && sr->mc.nu[biggestMatchIndex].id<1E9){ recoBacktrackCCSec
 recoBacktrackPDGSec->Fill(sr->mc.nu[biggestMatchIndex].pdg);
 
 }
-		track_mult->Fill(trackMult);
+
 
               if (goodInteraction){ track_multGood->Fill(trackMult);
         int cc=sr->mc.nu[biggestMatchIndex].iscc;
@@ -794,9 +747,9 @@ recoBacktrackPDGSec->Fill(sr->mc.nu[biggestMatchIndex].pdg);
          recoVertex2DBad->Fill(sr->common.ixn.dlp[nixn].vtx.x,sr->common.ixn.dlp[nixn].vtx.z);  trueVertex2DBad->Fill(trueVtxX,trueVtxZ);
           recoVertex2DBadYZ->Fill(sr->common.ixn.dlp[nixn].vtx.y,sr->common.ixn.dlp[nixn].vtx.z);
         } 
-	
-    
-    part_mult->Fill(partMult);      
+    }
+ if (trackMult>0 && trackMultExit>0){     track_mult->Fill(trackMult);
+    part_mult->Fill(partMult);   }   
  
 	
 	} //end for interaction
@@ -806,7 +759,7 @@ std::cout<<"All Interactions No Additional Selection: "<<double(goodIntNum)/true
 std::cout<<"In fiducial volume: "<<double(goodIntInFidVol)/true_mult->GetEntries()<<","<<float(goodIntInFidVol)/float(goodIntInFidVol+badIntInFidVol)<<std::endl;
 std::cout<<"All events with MINERvA match: "<<track_multGood->GetEntries()<<"/"<<track_mult->GetEntries()<<","<<double(track_multGood->GetEntries())/true_mult->GetEntries()<<","<<double(track_multGood->GetEntries())/track_mult->GetEntries()<<std::endl;  
 std::cout<<"All events with MINERvA match and <=2 tracks: "<<track_multGood->Integral(3,50)<<"/"<<track_mult->Integral(3,50)<<","<<double(track_multGood->Integral(3,50))/true_mult->Integral(3,50)<<","<<double(track_multGood->Integral(3,50))/track_mult->Integral(3,50)<<std::endl; 
-
+std::cout<<track_mult->GetEntries()/Nentries<<std::endl;
 //std::cout<<"Minerva Match Purity: "<<goodMINERvAMatch<<"/"<<totalMINERvAMatch<<std::endl;
 //Create output file and write your histograms
   TFile *caf_out_file = new TFile(output_rootfile.c_str(), "recreate");
@@ -903,6 +856,9 @@ matchTrue_mult->Write();
   confusionMatrix->Write();
   recoCosL->Write();
   trueDiffPosvsPDirZ->Write();
+  TH1D* track_multShape=(TH1D*)track_mult->Clone("track_multShape");
+  track_multShape->Scale(1.f/track_mult->GetEntries());
+  track_multShape->Write();
   caf_out_file->Close();
   
   return 1;  
@@ -910,15 +866,18 @@ matchTrue_mult->Write();
 
 int main(int argc, char** argv){
 
-  if(argc!=3){
+  if(argc!=4){
     std::cout << "\n USAGE: " << argv[0] << "input_caf_file_list output_root_file\n" << std::endl;
     return 1;
   }
-
+  
   std::string input_file_list = argv[1];
   std::string output_rootfile = argv[2];
-
-  caf_plotter(input_file_list, output_rootfile);
+  std::string mcOnlyString=argv[3];
+  bool mcOnly=true;
+  if (mcOnlyString=="0") mcOnly=false;
+  std::cout<<mcOnly<<","<<argv[3]<<std::endl;
+  caf_plotter(input_file_list, output_rootfile, mcOnly);
 
   return 0;
 }

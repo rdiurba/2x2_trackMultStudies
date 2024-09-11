@@ -30,15 +30,16 @@ return numerator/denominator;
 
 }
 
-int caf_plotter(std::string input_file_list, std::string output_rootfile){
+int caf_plotter(std::string input_file_list, std::string output_rootfile, bool mcOnly){
 
    int goodMINERvAMatch=0; int totalMINERvAMatch=0; int goodMINERvAMatchUS=0; int totalMINERvAMatchUS=0;
   //Give an input list
   std::ifstream caf_list(input_file_list.c_str());
   TH1D* dotProduct=new TH1D("dotProduct","dotProduct",30,0.9975,1);
   TH1D* dotProductGood=new TH1D("dotProductGood","dotProductGood",30,0.9975,1);
-  TH1D* deltaX=new TH1D("deltaX","deltaX",50,-25,25);
-  TH1D* deltaY=new TH1D("deltaY","deltaY",50,-25,25);
+  TH1D* dotProductPlotUS=new TH1D("dotProductUS","dotProductUS",30,0.9975,1);
+  TH1D* deltaX=new TH1D("deltaX","deltaX",60,-30,30);
+  TH1D* deltaY=new TH1D("deltaY","deltaY",60,-30,30);
   TH1D* deltaYGood=new TH1D("deltaYGood","deltaYGood",50,-25,25);
   TH1D* deltaYBad=new TH1D("deltaYBad","deltaYBad",50,-25,25);
   TH1D* deltaXGood=new TH1D("deltaXGood","deltaXGood",50,-25,25);
@@ -49,8 +50,14 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile){
   TH1D* deltaXGoodUS=new TH1D("deltaXGoodUS","deltaXGoodUS",50,-25,25);
   TH1D* deltaXBadUS=new TH1D("deltaXBadUS","deltaXBadUS",50,-25,25);
 
+  TH1D* deltaXUS=new TH1D("deltaXUS","deltaXUS",60,-30,30);
+  TH1D* deltaYUS=new TH1D("deltaYUS","deltaYUS",60,-30,30);
+    TH1D* deltaXUSFront=new TH1D("deltaXUSFront","deltaXUSFront",60,-30,30);
+  TH1D* deltaYUSFront=new TH1D("deltaYUSFront","deltaYUSFront",60,-30,30);
 
-
+  TH1D* trackStartXUS= new TH1D("trackStartXUS","trackStartXUS",60,-60,60);
+  TH1D* trackStartYUS= new TH1D("trackStartYUS","trackStartYUS",60,-60,60);
+  TH2D* trackStartUS=new TH2D("trackStartUS","trackStartUS",60,-60,60,60,-60,60);
 
 
 
@@ -88,11 +95,13 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile){
 
 	if(n%10000 == 0) std::cout << Form("Processing trigger %ld of %ld", n, Nentries) << std::endl;
 	caf_chain->GetEntry(n); //Get spill from tree
-
+       double mnvOffsetX=-10; double mnvOffsetY=5;
+       if (mcOnly){ mnvOffsetX=0; mnvOffsetY=0;}
 	
 	for(long unsigned nixn = 0; nixn < sr->common.ixn.dlp.size(); nixn++){
           double biggestMatch=-999; int biggestMatchIndex=-999; double maxDotProductDS=-999; double maxDotProductUS=-999;   
             int maxEventPar=-999; int maxEventTyp=-9999; int maxEventIxn=-999;
+           if (mcOnly){
            for (int ntruth=0; ntruth<sr->common.ixn.dlp[nixn].truth.size(); ntruth++){
           
           if (biggestMatch<sr->common.ixn.dlp[nixn].truthOverlap.at(ntruth)){
@@ -104,13 +113,14 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile){
 
 		}
 		}
- 
+ 		}
     	for(long unsigned npart=0; npart < sr->common.ixn.dlp[nixn].part.dlp.size(); npart++){ //loop over particles
                 if (!sr->common.ixn.dlp[nixn].part.dlp[npart].primary) continue; 
                int pdg=sr->common.ixn.dlp[nixn].part.dlp[npart].pdg;
 		int maxIxnNumber=-9999; int maxPartNumber=-999; int maxTypeNumber=-999; int correctTrack=2;
 		if ( (abs(pdg)==2212 || abs(pdg)==13 || abs(pdg)==211 || abs(pdg)==321)){
-			auto truthSize=sr->common.ixn.dlp[nixn].part.dlp[npart].truth.size();
+			if (mcOnly){
+                        auto truthSize=sr->common.ixn.dlp[nixn].part.dlp[npart].truth.size();
 			double maxPartTruthOverlap=0;
 			for (int backTrack=0; backTrack<truthSize; backTrack++){
 			int parType=sr->common.ixn.dlp[nixn].part.dlp[npart].truth[backTrack].type;
@@ -150,6 +160,7 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile){
 			if (partTruthOverlap<0.5) correctTrack=2;
 			else backtracked=-1; 
 			}
+			}
                 //if (maxPartTruthOverlap<0.5) continue;
 
 	       auto start_pos=sr->common.ixn.dlp[nixn].part.dlp[npart].start;
@@ -159,14 +170,8 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile){
 		double diffVertexdX=abs(start_pos.x-sr->common.ixn.dlp[nixn].vtx.x);
 		double diffVertexdY=abs(start_pos.y-sr->common.ixn.dlp[nixn].vtx.y);
 		double diffVertex=TMath::Sqrt(diffVertexdZ*diffVertexdZ+diffVertexdY*diffVertexdY+diffVertexdX*diffVertexdX);
-		if (diffVertex>3) continue;
+		if (diffVertex>5) continue;
 	       if (std::isnan(start_pos.z)) continue;
-	/*	if (end_pos.z<start_pos.z){
-		auto start_pos_temp=end_pos;
-		end_pos=start_pos;
-		start_pos=start_pos_temp;
-
-		}*/
 	       double dX=(end_pos.x-start_pos.x);
 	       double dY=(end_pos.y-start_pos.y);
 	       double dZ=(end_pos.z-start_pos.z);
@@ -177,13 +182,19 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile){
 
 		if (std::isnan(start_pos.z)) length=-999;
 
-		if (sr->common.ixn.dlp[nixn].part.dlp[npart].primary==true && length>5){
+		if (sr->common.ixn.dlp[nixn].part.dlp[npart].primary==true && length>1){
   
 		int maxPartMinerva=-999; int maxTypeMinerva=-999;    int maxIxnMinerva=-999;   int maxIxnMinervaUS=-999;
   
-		int maxPartMinervaUS=-999; int maxTypeMinervaUS=-999;      
+		int maxPartMinervaUS=-999; int maxTypeMinervaUS=-999;
+                
+
+if ( (start_pos.z<-60 && end_pos.z>60) || (start_pos.z>60 && end_pos.z<-60)){
+		trackStartXUS->Fill(start_pos.x); trackStartYUS->Fill(start_pos.y);
+          trackStartUS->Fill(start_pos.x,start_pos.y);      }
 		if ((abs(start_pos.z)>58 || abs(end_pos.z)>58) ){
 		double dotProductDS=-999; double deltaExtrapYUS=-999; double deltaExtrapY=-999; double dotProductUS=-999; double deltaExtrapX=-999; double deltaExtrapXUS=-999;	
+double deltaExtrapXUSFront=-999; double deltaExtrapYUSFront=-999;
 	 	for(int i=0; i<sr->nd.minerva.ixn.size(); i++){
 
 		for (int j=0; j<sr->nd.minerva.ixn[i].ntracks; j++){
@@ -199,7 +210,12 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile){
 
 
 
-		if (start_z>0 && end_z>0 && ((start_pos.z)>58 || (end_pos.z)>58) ){
+		if (start_z>0 && end_z>0 && ((start_pos.z)>60 || (end_pos.z)>60) ){
+
+
+          if (/*abs(abs(sr->common.ixn.dlp[nixn].vtx.x)-33)<1 ||*/ abs(sr->common.ixn.dlp[nixn].vtx.x)>59 || abs(sr->common.ixn.dlp[nixn].vtx.x)<5 || abs(sr->common.ixn.dlp[nixn].vtx.y)>57 || abs(sr->common.ixn.dlp[nixn].vtx.z)<5 || abs(sr->common.ixn.dlp[nixn].vtx.z)>59.5)  continue;
+
+
 		int truthPart=sr->nd.minerva.ixn[i].tracks[j].truth[0].part;
 		double dXMnv=(sr->nd.minerva.ixn[i].tracks[j].end.x-sr->nd.minerva.ixn[i].tracks[j].start.x);
 		double dYMnv=(sr->nd.minerva.ixn[i].tracks[j].end.y-sr->nd.minerva.ixn[i].tracks[j].start.y);
@@ -216,18 +232,20 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile){
 		double diffExtrap=TMath::Sqrt(TMath::Power(extrapY-start_y,2));
 
 
-		if (dotProductDS<dotProduct && abs(TMath::ACos(dirXMinerva)-TMath::ACos(dirX))<0.06 && abs(TMath::ACos(dirYMinerva)-TMath::ACos(dirY))<0.06 && abs(extrapY)<10 && abs(extrapX)<10){ dotProductDS=dotProduct;
+		if (dotProductDS<dotProduct && abs(extrapY-mnvOffsetY)<15 && abs(extrapX-mnvOffsetX)<15  &&  abs(TMath::ATan(dirXMinerva/dirZMinerva)-TMath::ATan(dirX/dirZ))<0.06 && abs(TMath::ATan(dirYMinerva/dirZMinerva)-TMath::ATan(dirY/dirZ))<0.06){ dotProductDS=dotProduct;
 		deltaExtrapY=extrapY;
 		deltaExtrapX=extrapX;
+		if (mcOnly){
 		maxPartMinerva=sr->nd.minerva.ixn[i].tracks[j].truth[0].part;
 		maxTypeMinerva=sr->nd.minerva.ixn[i].tracks[j].truth[0].type;
 		maxIxnMinerva=sr->nd.minerva.ixn[i].tracks[j].truth[0].ixn;
-		std::cout<<sr->nd.minerva.ixn[i].tracks[j].truth.size()<<std::endl;
+		}
 
 		}}
 
-		if (start_z<0 && end_z>0 && ( (start_pos.z<-58 && end_pos.z>58) || (start_pos.z>58 && end_pos.z<-58))){
-		int truthPart=sr->nd.minerva.ixn[i].tracks[j].truth[0].part;
+		if (start_z<0 && end_z>0 && ( (start_pos.z<-60 && end_pos.z>60) || (start_pos.z>60 && end_pos.z<-60))){
+	       if (start_z>-1000 && start_z<-900)	std::cout<<start_z<<std::endl;
+	int truthPart=sr->nd.minerva.ixn[i].tracks[j].truth[0].part;
 		double dXMnv=(sr->nd.minerva.ixn[i].tracks[j].end.x-sr->nd.minerva.ixn[i].tracks[j].start.x);
 		double dYMnv=(sr->nd.minerva.ixn[i].tracks[j].end.y-sr->nd.minerva.ixn[i].tracks[j].start.y);
 		double dZMnv=(sr->nd.minerva.ixn[i].tracks[j].end.z-sr->nd.minerva.ixn[i].tracks[j].start.z);
@@ -235,20 +253,25 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile){
 		double dirXMinerva=dXMnv/lengthMinerva;
 		double dirYMinerva=dYMnv/lengthMinerva;
 		double dirZMinerva=dZMnv/lengthMinerva;
-		double dotProduct=dirXMinerva*dirX+dirYMinerva*dirY+dirZ*dirZMinerva;
+		double dotProductTemp=dirXMinerva*dirX+dirYMinerva*dirY+dirZ*dirZMinerva;
 
 		double extrapdZUS=end_z-end_pos.z;
 		double extrapYUS=dirY/dirZ*(extrapdZUS)+end_pos.y-end_y;
 		double extrapXUS=dirX/dirZ*(extrapdZUS)+end_pos.x-end_x;
-		
+		double extrapdZUSFront=start_z-start_pos.z;
+	        double extrapYUSFront=dirY/dirZ*(extrapdZUSFront)+start_pos.y-start_y;
+                double extrapXUSFront=dirX/dirZ*(extrapdZUSFront)+start_pos.x-start_x;	
                 //double diffExtrap=TMath::Sqrt(TMath::Power(extrapY-end_y,2));
-		if (dotProductUS<dotProduct  && abs(TMath::ACos(dirXMinerva)-TMath::ACos(dirX))<0.06 && abs(TMath::ACos(dirYMinerva)-TMath::ACos(dirY))<0.06   && abs(extrapYUS)<10 && abs(extrapXUS)<10) dotProductUS=dotProduct;
+		if (dotProductUS<dotProductTemp  && abs(extrapYUS-mnvOffsetY)<15 && abs(extrapXUS-mnvOffsetX)<15 && abs(TMath::ATan(dirXMinerva/dirZMinerva)-TMath::ATan(dirX/dirZ))<0.06 && abs(TMath::ATan(dirYMinerva/dirZMinerva)-TMath::ATan(dirY/dirZ))<0.06){ dotProductUS=dotProductTemp;
 		deltaExtrapYUS=extrapYUS;
                 deltaExtrapXUS=extrapXUS;
-		maxPartMinervaUS=sr->nd.minerva.ixn[i].tracks[j].truth[0].part;
+                deltaExtrapXUSFront=extrapXUSFront;
+                deltaExtrapYUSFront=extrapYUSFront;
+		if (mcOnly){
+                maxPartMinervaUS=sr->nd.minerva.ixn[i].tracks[j].truth[0].part;
 		maxTypeMinervaUS=sr->nd.minerva.ixn[i].tracks[j].truth[0].type;	
 		maxIxnMinervaUS=sr->nd.minerva.ixn[i].tracks[j].truth[0].ixn;
-                
+                }}
 
 
 //if (maxPartMinervaUS==maxPartNumber) std::cout<<extrapdZ<<","<<dirY/dirZ*(extrapdZ)<<","<<double(dirX/dirZ*(extrapdZ))<<","<<end_y<<","<<end_x<<std::endl;
@@ -257,10 +280,10 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile){
 		
 		}} // Minerva
 	if (dotProductDS>maxDotProductDS) maxDotProductDS=dotProductDS;
-	 if (dotProductDS>0.9975){   
+	 if (dotProductDS>0.99){   
          dotProduct->Fill(dotProductDS);
          deltaX->Fill(deltaExtrapX); deltaY->Fill(deltaExtrapY);	
-	if (maxIxnMinerva==maxIxnNumber && maxPartNumber==maxPartMinerva && maxTypeMinerva==maxTypeNumber){ goodMINERvAMatch++; deltaXGood->Fill(deltaExtrapX); deltaYGood->Fill(deltaExtrapY); dotProductGood->Fill(dotProductDS);
+	if (mcOnly && maxIxnMinerva==maxIxnNumber && maxPartNumber==maxPartMinerva && maxTypeMinerva==maxTypeNumber){ goodMINERvAMatch++; deltaXGood->Fill(deltaExtrapX); deltaYGood->Fill(deltaExtrapY); dotProductGood->Fill(dotProductDS);
           if (maxTypeMinerva==1){
                auto start_posMnv=sr->mc.nu[maxIxnMinerva].prim[maxPartMinerva].start_pos;
        auto end_posMnv=sr->mc.nu[maxIxnMinerva].prim[maxPartMinerva].end_pos;
@@ -280,7 +303,7 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile){
 
 
        //if (abs(start_pos.z-start_posMnv.z)<5)   minervaMatchCos->Fill(cosL);
-       if (cosLDist<0.9) std::cout<<start_pos.z<<","<<end_pos.z<<","<<start_posMnv.z<<","<<end_posMnv.z<<","<<cosL<<","<<cosLDist<<","<<sr->mc.nu[maxIxnMinerva].prim[maxPartMinerva].pdg<<std::endl;
+       //if (cosLDist<0.9) std::cout<<start_pos.z<<","<<end_pos.z<<","<<start_posMnv.z<<","<<end_posMnv.z<<","<<cosL<<","<<cosLDist<<","<<sr->mc.nu[maxIxnMinerva].prim[maxPartMinerva].pdg<<std::endl;
 
          } 
 	}}
@@ -288,8 +311,15 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile){
 	      totalMINERvAMatch++;       
 	 }
 	if (dotProductUS>maxDotProductUS) maxDotProductUS=dotProductUS;
-	 if (dotProductUS>0.9975){   
-		if (maxIxnMinervaUS==maxIxnNumber && maxPartNumber==maxPartMinervaUS && maxTypeMinervaUS==maxTypeNumber){ deltaYGoodUS->Fill(deltaExtrapYUS); deltaXGoodUS->Fill(deltaExtrapXUS); goodMINERvAMatchUS++;} 
+	 if (dotProductUS>0.99){   
+	  dotProductPlotUS->Fill(dotProductUS);
+	 deltaXUSFront->Fill(deltaExtrapXUSFront); deltaYUSFront->Fill(deltaExtrapYUSFront);	
+         deltaXUS->Fill(deltaExtrapXUS); deltaYUS->Fill(deltaExtrapYUS);
+         /*trackStartXUS->Fill(start_pos.x); trackStartYUS->Fill(start_pos.y);
+          trackStartUS->Fill(start_pos.x,start_pos.y);
+		*/
+
+ if (mcOnly && maxIxnMinervaUS==maxIxnNumber && maxPartNumber==maxPartMinervaUS && maxTypeMinervaUS==maxTypeNumber){ deltaYGoodUS->Fill(deltaExtrapYUS); deltaXGoodUS->Fill(deltaExtrapXUS); goodMINERvAMatchUS++;} 
               else{ deltaYBadUS->Fill(deltaExtrapYUS); deltaXBadUS->Fill(deltaExtrapXUS); }
        totalMINERvAMatchUS++;       
 	 }
@@ -314,13 +344,18 @@ std::cout<<"Minerva Match Purity DS: "<<goodMINERvAMatch<<"/"<<totalMINERvAMatch
   deltaXBad->Write();
   dotProduct->Write(); 
   dotProductGood->Write();
+  dotProductPlotUS->Write();
   deltaYGoodUS->Write();
   deltaYBadUS->Write();
   deltaXGoodUS->Write();
   deltaXBadUS->Write();
-  
-
-
+  deltaXUS->Write();
+  deltaYUS->Write(); 
+  trackStartXUS->Write();
+  trackStartYUS->Write();
+  trackStartUS->Write();
+  deltaXUSFront->Write();
+  deltaYUSFront->Write();
 
 
 
@@ -332,15 +367,19 @@ std::cout<<"Minerva Match Purity DS: "<<goodMINERvAMatch<<"/"<<totalMINERvAMatch
 
 int main(int argc, char** argv){
 
-  if(argc!=3){
+  if(argc!=4){
     std::cout << "\n USAGE: " << argv[0] << "input_caf_file_list output_root_file\n" << std::endl;
     return 1;
   }
 
   std::string input_file_list = argv[1];
   std::string output_rootfile = argv[2];
+  std::string mcOnlyString=argv[3];
+  bool mcOnly=true;
+  if (mcOnlyString=="0") mcOnly=false;
+  std::cout<<mcOnly<<","<<argv[3]<<std::endl;
 
-  caf_plotter(input_file_list, output_rootfile);
+  caf_plotter(input_file_list, output_rootfile,mcOnly);
 
   return 0;
 }
