@@ -1,25 +1,8 @@
 source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
-setxkbmap ch
-#Taken from ND_CAFMaker, some of these might not be necessary
-setup cmake v3_22_2
-setup gcc v9_3_0
-setup pycurl
-setup ifdhc
-setup geant4 v4_11_0_p01c -q e20:debug
+
+setup duneanaobj v03_06_01b -q e20:prof
 setup dk2nugenie   v01_10_01k -q debug:e20
-setup genie_xsec   v3_04_00 -q AR2320i00000:e1000:k250
-setup genie_phyopt v3_04_00 -q dkcharmtau
-setup jobsub_client
-setup eigen v3_3_5
-setup duneanaobj v03_02_01 -q e20:prof
-setup hdf5 v1_10_5a -q e20
-setup fhiclcpp v4_15_03 -q debug:e20
-
-
-# edep-sim needs to know where a certain GEANT .cmake file is...
-G4_cmake_file=`find ${GEANT4_FQ_DIR}/lib -name 'Geant4Config.cmake'`
-export Geant4_DIR=`dirname $G4_cmake_file`
-
+setup cmake v3_27_4
 # edep-sim needs to have the GEANT bin directory in the path
 export PATH=$PATH:$GEANT4_FQ_DIR/bin
 
@@ -42,4 +25,16 @@ export LD_LIBRARY_PATH=${DUNEANAOBJ_LIB}:$LD_LIBRARY_PATH
 mydir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 export LD_LIBRARY_PATH=$mydir/lib:$LD_LIBRARY_PATH
 export PATH=$mydir/bin:$PATH
+
+
+export ROOUNFOLD=/global/homes/r/rdiurba/cafAna/RooUnfold
+export LD_LIBRARY_PATH=$ROOUNFOLD:$LD_LIBRARY_PATH
+export C_INCLUDE_PATH="$ROOUNFOLD:$C_INCLUDEPATH"
+export CPLUS_INCLUDE_PATH=$ROOUNFOLD:$CPLUS_INCLUDE_PATH
+export PATH="$ROOUNFOLD:$PATH"
+
+export LD_LIBRARY_PATH=$ROOUNFOLD/src:$LD_LIBRARY_PATH
+export C_INCLUDE_PATH="$ROOUNFOLD/src:$C_INCLUDEPATH"
+export CPLUS_INCLUDE_PATH=$ROOUNFOLD/src:$CPLUS_INCLUDE_PATH
+export PATH="$ROOUNFOLD/src:$PATH"
 
