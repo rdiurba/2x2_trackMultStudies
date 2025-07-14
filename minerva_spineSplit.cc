@@ -3,6 +3,7 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TChain.h"
+#include "TProfile2D.h"
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -25,6 +26,9 @@ double numerator=(X1*Y2-Y1*X2)-(X1*Z2-X2*Z1)+(Y1*Z2-Z1*Y2);
 
 return numerator/denominator;
 
+
+
+
 }
 
 int caf_plotter(std::string input_file_list, std::string output_rootfile, bool mcOnly){
@@ -32,14 +36,7 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile, bool m
    int goodMINERvAMatch=0; int totalMINERvAMatch=0; int goodMINERvAMatchUS=0; int totalMINERvAMatchUS=0;
   //Give an input list
   std::ifstream caf_list(input_file_list.c_str());
-   TTree *tree = new TTree("output", "output");
-    unsigned long missMatchNS=0; unsigned long missMatchS=0; int runNumber=0; int eventNumber=0;
-   tree->Branch("missMatchNS",&missMatchNS,"missMatchNS/l");
-   tree->Branch("missMatchS",&missMatchS,"missMatchS/l");
-       tree->Branch("runNumber",&runNumber,"runNumber/I");
-
-       tree->Branch("eventNumber",&eventNumber,"eventNumber/I");
-   TH1D* dotProduct=new TH1D("dotProduct","dotProduct",30,0.9975,1);
+  TH1D* dotProduct=new TH1D("dotProduct","dotProduct",30,0.9975,1);
   TH1D* dotProductGood=new TH1D("dotProductGood","dotProductGood",30,0.9975,1);
   TH1D* dotProductPlotUS=new TH1D("dotProductUS","dotProductUS",30,0.9975,1);
   TH1D* deltaX=new TH1D("deltaX","deltaX",60,-30,30);
@@ -65,6 +62,12 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile, bool m
       TH1D* trackStartZUS= new TH1D("trackStartZUS","trackStartZUS",60,-60,60);
 
   TH2D* trackStartUS=new TH2D("trackStartUS","trackStartUS",15,-60,60,15,-60,60);
+  TProfile2D* trackdXStartUS=new TProfile2D("trackdXStartUS","trackdXStartUS",2,-60,60,2,-60,60,-20,20);
+  TProfile2D* trackdXEndUS=new TProfile2D("trackdXEndUS","trackdXEndUS",2,-60,60,2,-60,60,-20,20);
+  TProfile2D* trackdYStartUS=new TProfile2D("trackdYStartUS","trackdYStartUS",2,-60,60,2,-60,60,-20,20);
+  TProfile2D* trackdYEndUS=new TProfile2D("trackdYEndUS","trackdYEndUS",2,-60,60,2,-60,60,-20,20);
+
+
 
   TH1D* trackEndXUS= new TH1D("trackEndXUS","trackEndXUS",60,-60,60);
   TH1D* trackEndYUS= new TH1D("trackEndYUS","trackEndYUS",60,-60,60);
@@ -76,7 +79,10 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile, bool m
           TH2D* mx2StartDS=new TH2D("mx2StartDS","mx2StartDS",15,-60,60,15,-60,60);
 
       TH1D* trackEndZUS= new TH1D("trackEndZUS","trackEndZUS",60,-60,60);
-
+    TH1D* trueMuZUS=new TH1D("trueMuZUS","trueMuZUS",75,150,300);
+    TH1D* truePiZUS=new TH1D("truePiZUS","truePiZUS",75,150,300);
+    TH1D* trueMuZDS=new TH1D("trueMuZDS","trueMuZDS",75,150,300);
+    TH1D* truePiZDS=new TH1D("truePiZDS","truePiZDS",75,150,300);
   double sumPOT=0;
   //Check if input list is present
   if(!caf_list.is_open()){
@@ -103,7 +109,7 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile, bool m
   std::cout << Form("Total number of spills = %ld", Nentries) << std::endl;
 
   //Define Standard Record and link it to the CAF tree branch "rec"
-   auto sr = new caf::StandardRecord;
+  auto sr = new caf::StandardRecord;
   caf_chain->SetBranchAddress("rec", &sr);
    totalSpills->Fill(0.5,Nentries);
    int throughGoing=0;
@@ -120,27 +126,45 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile, bool m
 	caf_chain->GetEntry(n); //Get spill from tree
      sumPOT=sr->beam.pulsepot/1e13+sumPOT;
 
-       double mnvOffsetX=-11; double mnvOffsetY=5;
-       if (mcOnly){ mnvOffsetX=0; mnvOffsetY=0;}
+       double mnvOffsetXBack=-11; double mnvOffsetYBack=5.2;
+             double mnvOffsetXFront=-4.2; double mnvOffsetYFront=4.2;
+       if (mcOnly){ mnvOffsetXBack=0; mnvOffsetYBack=0; mnvOffsetXFront=0; mnvOffsetYFront=0;}
 
       	 for(int i=0; i<sr->nd.minerva.ixn.size(); i++){
 
 		for (int j=0; j<sr->nd.minerva.ixn[i].ntracks; j++){
-		double dir_z=sr->nd.minerva.ixn[i].tracks[j].dir.z;
-        double dir_y=sr->nd.minerva.ixn[i].tracks[j].dir.y;
-		double dir_x=sr->nd.minerva.ixn[i].tracks[j].dir.x;
 
 		double end_z=sr->nd.minerva.ixn[i].tracks[j].end.z;
 		double start_z=sr->nd.minerva.ixn[i].tracks[j].start.z;
-		double end_x=sr->nd.minerva.ixn[i].tracks[j].end.x;
-		double start_x=sr->nd.minerva.ixn[i].tracks[j].start.x;
+        double offsetYStart=mnvOffsetYFront; double offsetXStart=mnvOffsetXFront;
+        double offsetYEnd=mnvOffsetYBack; double offsetXEnd=mnvOffsetXBack;
+        if (start_z>0){
+            offsetYStart=mnvOffsetYBack; offsetXStart=mnvOffsetXBack;
+        }
+        if (end_z<0){
+            offsetYEnd=mnvOffsetYFront; offsetYEnd=mnvOffsetYFront;
+        }
 
-		double end_y=sr->nd.minerva.ixn[i].tracks[j].end.y;
-		double start_y=sr->nd.minerva.ixn[i].tracks[j].start.y;
-        double xFrontFace=dir_x/dir_z*(-60-start_z)+start_x+mnvOffsetX;
-        double yFrontFace=dir_y/dir_z*(-60-start_z)+start_y+mnvOffsetY;
-        double xBackFace=dir_x/dir_z*(60-start_z)+start_x+mnvOffsetX;
-        double yBackFace=dir_y/dir_z*(60-start_z)+start_y+mnvOffsetY;
+
+		double end_x=sr->nd.minerva.ixn[i].tracks[j].end.x+offsetXEnd;
+		double start_x=sr->nd.minerva.ixn[i].tracks[j].start.x+offsetXStart;
+
+		double end_y=sr->nd.minerva.ixn[i].tracks[j].end.y+offsetYEnd;
+		double start_y=sr->nd.minerva.ixn[i].tracks[j].start.y+offsetYStart;
+
+        double dXMnv=(end_x-start_x);
+		double dYMnv=(end_y-start_y);
+		double dZMnv=(end_z-start_z);
+		double lengthMinerva=TMath::Sqrt(dXMnv*dXMnv+dYMnv*dYMnv+dZMnv*dZMnv);
+
+        double dir_x=dXMnv/lengthMinerva;
+		double dir_y=dYMnv/lengthMinerva;
+		double dir_z=dZMnv/lengthMinerva;
+            
+        double xFrontFace=dir_x/dir_z*(-60-start_z)+start_x;
+        double yFrontFace=dir_y/dir_z*(-60-start_z)+start_y;
+        double xBackFace=dir_x/dir_z*(60-start_z)+start_x;
+        double yBackFace=dir_y/dir_z*(60-start_z)+start_y;
 
             
 		if (start_z<0 && end_z>0 && abs(xFrontFace)<60 && abs(yFrontFace)<60 && abs(xBackFace)<60 && abs(yBackFace)<60 && abs(xFrontFace)>5 && abs(xBackFace)>5){ 
@@ -149,53 +173,58 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile, bool m
             mx2StartUS->Fill(xFrontFace,yFrontFace);
             throughGoing++; mx2InTheEvent++;}
 
-              		if (start_z>0 && start_z<170 && end_z>270 && abs(xBackFace)<60 && abs(yBackFace)<60 && abs(xBackFace)>5){ 
+              		if (start_z>0 && start_z<170 && end_z>171 && abs(xBackFace)<60 && abs(yBackFace)<60 && abs(xBackFace)>5){ 
             mx2StartDS->Fill(xBackFace,yBackFace);
             startingFrom2x2Demonstrator++;}
         
         
         
         }}
+
+
+
+
 	
-	for(long unsigned nixn = 0; nixn < sr->common.ixn.pandora.size(); nixn++){
+	for(long unsigned nixn = 0; nixn < sr->common.ixn.dlp.size(); nixn++){
           double biggestMatch=-999; int biggestMatchIndex=-999; double maxDotProductDS=-999; double maxDotProductUS=-999;   
             int maxEventPar=-999; int maxEventTyp=-9999; int maxEventIxn=-999;
            if (mcOnly){
-           for (int ntruth=0; ntruth<sr->common.ixn.pandora[nixn].truth.size(); ntruth++){
+           for (int ntruth=0; ntruth<sr->common.ixn.dlp[nixn].truth.size(); ntruth++){
           
-          if (biggestMatch<sr->common.ixn.pandora[nixn].truthOverlap.at(ntruth)){
+          if (biggestMatch<sr->common.ixn.dlp[nixn].truthOverlap.at(ntruth)){
           
-          biggestMatch=sr->common.ixn.pandora[nixn].truthOverlap.at(ntruth);
-          biggestMatchIndex=sr->common.ixn.pandora[nixn].truth.at(ntruth);
+          biggestMatch=sr->common.ixn.dlp[nixn].truthOverlap.at(ntruth);
+          biggestMatchIndex=sr->common.ixn.dlp[nixn].truth.at(ntruth);
            //std::cout<<"Biggest Match: "<<biggestMatch<<std::endl;
 
 
 		}
 		}
  		}
-    	for(long unsigned npart=0; npart < sr->common.ixn.pandora[nixn].part.pandora.size(); npart++){ //loop over particles
-              //if (!sr->common.ixn.pandora[nixn].part.pandora[npart].primary) continue; 
-               int pdg=sr->common.ixn.pandora[nixn].part.pandora[npart].pdg;
+    	for(long unsigned npart=0; npart < sr->common.ixn.dlp[nixn].part.dlp.size(); npart++){ //loop over particles
+              //if (!sr->common.ixn.dlp[nixn].part.dlp[npart].primary) continue; 
+               int pdg=sr->common.ixn.dlp[nixn].part.dlp[npart].pdg;
+            //pdg=13;
             //std::cout<<pdg<<std::endl;
 		int maxIxnNumber=-9999; int maxPartNumber=-999; int maxTypeNumber=-999; int correctTrack=2;
-		if ( (pdg!=-1)){
+		if ( (pdg!=11 && pdg!=111 && pdg!=22)){
 			if (mcOnly){
-                        auto truthSize=sr->common.ixn.pandora[nixn].part.pandora[npart].truth.size();
+                        auto truthSize=sr->common.ixn.dlp[nixn].part.dlp[npart].truth.size();
 			double maxPartTruthOverlap=0;
 			for (int backTrack=0; backTrack<truthSize; backTrack++){
-			int parType=sr->common.ixn.pandora[nixn].part.pandora[npart].truth[backTrack].type;
-			int partNumber=sr->common.ixn.pandora[nixn].part.pandora[npart].truth[backTrack].part;
-			int interactionNumber=sr->common.ixn.pandora[nixn].part.pandora[npart].truth[backTrack].ixn;
-			double  partTruthOverlap=sr->common.ixn.pandora[nixn].part.pandora[npart].truthOverlap[backTrack];
+			int parType=sr->common.ixn.dlp[nixn].part.dlp[npart].truth[backTrack].type;
+			int partNumber=sr->common.ixn.dlp[nixn].part.dlp[npart].truth[backTrack].part;
+			int interactionNumber=sr->common.ixn.dlp[nixn].part.dlp[npart].truth[backTrack].ixn;
+			double  partTruthOverlap=sr->common.ixn.dlp[nixn].part.dlp[npart].truthOverlap[backTrack];
 			//std::cout<<"Truth has overlap of: "<<partTruthOverlap<<std::endl;
 			if (maxPartTruthOverlap<partTruthOverlap){maxPartTruthOverlap=partTruthOverlap;}
 			}
 
 			for (int backTrack=0; backTrack<truthSize; backTrack++){
-			int parType=sr->common.ixn.pandora[nixn].part.pandora[npart].truth[backTrack].type;
-			int partNumber=sr->common.ixn.pandora[nixn].part.pandora[npart].truth[backTrack].part;
-			int interactionNumber=sr->common.ixn.pandora[nixn].part.pandora[npart].truth[backTrack].ixn;
-			double  partTruthOverlap=sr->common.ixn.pandora[nixn].part.pandora[npart].truthOverlap[backTrack];
+			int parType=sr->common.ixn.dlp[nixn].part.dlp[npart].truth[backTrack].type;
+			int partNumber=sr->common.ixn.dlp[nixn].part.dlp[npart].truth[backTrack].part;
+			int interactionNumber=sr->common.ixn.dlp[nixn].part.dlp[npart].truth[backTrack].ixn;
+			double  partTruthOverlap=sr->common.ixn.dlp[nixn].part.dlp[npart].truthOverlap[backTrack];
 
 			int backtracked=-9999;
 			if (partTruthOverlap>0.5){  
@@ -203,7 +232,7 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile, bool m
 			maxTypeNumber=parType;
                         maxIxnNumber=interactionNumber;
 			if (parType<3){ backtracked=sr->mc.nu[interactionNumber].prim[partNumber].pdg;
-                        //std::cout<<sr->common.ixn.pandora[nixn].part.pandora[npart].start.z<<","<<sr->mc.nu[maxIxnNumber].prim[maxPartNumber].start_pos.z<<std::endl;
+                        //std::cout<<sr->common.ixn.dlp[nixn].part.dlp[npart].start.z<<","<<sr->mc.nu[maxIxnNumber].prim[maxPartNumber].start_pos.z<<std::endl;
 
 			}
 			else backtracked=sr->mc.nu[interactionNumber].sec[partNumber].pdg;
@@ -223,12 +252,12 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile, bool m
 			}
                 //if (maxPartTruthOverlap<0.5) continue;
 
-	       auto start_pos=sr->common.ixn.pandora[nixn].part.pandora[npart].start;
-	       auto end_pos=sr->common.ixn.pandora[nixn].part.pandora[npart].end;
+	       auto start_pos=sr->common.ixn.dlp[nixn].part.dlp[npart].start;
+	       auto end_pos=sr->common.ixn.dlp[nixn].part.dlp[npart].end;
 
-		double diffVertexdZ=abs(start_pos.z-sr->common.ixn.pandora[nixn].vtx.z);
-		double diffVertexdX=abs(start_pos.x-sr->common.ixn.pandora[nixn].vtx.x);
-		double diffVertexdY=abs(start_pos.y-sr->common.ixn.pandora[nixn].vtx.y);
+		double diffVertexdZ=abs(start_pos.z-sr->common.ixn.dlp[nixn].vtx.z);
+		double diffVertexdX=abs(start_pos.x-sr->common.ixn.dlp[nixn].vtx.x);
+		double diffVertexdY=abs(start_pos.y-sr->common.ixn.dlp[nixn].vtx.y);
 		double diffVertex=TMath::Sqrt(diffVertexdZ*diffVertexdZ+diffVertexdY*diffVertexdY+diffVertexdX*diffVertexdX);
         //    std::cout<<start_pos.z<<","<<end_pos.z<<std::endl;
 		//if (diffVertex>5) continue;
@@ -248,33 +277,48 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile, bool m
 		int maxPartMinerva=-999; int maxTypeMinerva=-999;    int maxIxnMinerva=-999;   int maxIxnMinervaUS=-999;
   
 		int maxPartMinervaUS=-999; int maxTypeMinervaUS=-999;
-                
-
+        double bestEndZUS=0;
+        double bestEndZDS=0; double bestStartZDS=0;
 		if ((abs(start_pos.z)>58 || abs(end_pos.z)>58) ){
 		double dotProductDS=-999; double deltaExtrapYUS=-999; double deltaExtrapY=-999; double dotProductUS=-999; double deltaExtrapX=-999; double deltaExtrapXUS=-999;	
 double deltaExtrapXUSFront=-999; double deltaExtrapYUSFront=-999;
 	 	for(int i=0; i<sr->nd.minerva.ixn.size(); i++){
 
 		for (int j=0; j<sr->nd.minerva.ixn[i].ntracks; j++){
-		double dir_z=sr->nd.minerva.ixn[i].tracks[j].dir.z;
-        double dir_y=sr->nd.minerva.ixn[i].tracks[j].dir.y;
-		double dir_x=sr->nd.minerva.ixn[i].tracks[j].dir.x;
-
 		double end_z=sr->nd.minerva.ixn[i].tracks[j].end.z;
 		double start_z=sr->nd.minerva.ixn[i].tracks[j].start.z;
-		double end_x=sr->nd.minerva.ixn[i].tracks[j].end.x;
-		double start_x=sr->nd.minerva.ixn[i].tracks[j].start.x;
-
-		double end_y=sr->nd.minerva.ixn[i].tracks[j].end.y;
-		double start_y=sr->nd.minerva.ixn[i].tracks[j].start.y;
-        double xFrontFace=dir_x/dir_z*(-60-start_z)+start_x+mnvOffsetX;
-        double yFrontFace=dir_y/dir_z*(-60-start_z)+start_y+mnvOffsetY;
-        double xBackFace=dir_x/dir_z*(60-start_z)+start_x+mnvOffsetX;
-        double yBackFace=dir_y/dir_z*(60-start_z)+start_y+mnvOffsetY;
-                
+        double offsetYStart=mnvOffsetYFront; double offsetXStart=mnvOffsetXFront;
+        double offsetYEnd=mnvOffsetYBack; double offsetXEnd=mnvOffsetXBack;
+        if (start_z>0){
+            offsetYStart=mnvOffsetYBack; offsetXStart=mnvOffsetXBack;
+        }
+        if (end_z<0){
+            offsetYEnd=mnvOffsetYFront; offsetYEnd=mnvOffsetYFront;
+        }
 
 
+		double end_x=sr->nd.minerva.ixn[i].tracks[j].end.x+offsetXEnd;
+		double start_x=sr->nd.minerva.ixn[i].tracks[j].start.x+offsetXStart;
 
+		double end_y=sr->nd.minerva.ixn[i].tracks[j].end.y+offsetYEnd;
+		double start_y=sr->nd.minerva.ixn[i].tracks[j].start.y+offsetYStart;
+
+        double dXMnv=(end_x-start_x);
+		double dYMnv=(end_y-start_y);
+		double dZMnv=(end_z-start_z);
+		double lengthMinerva=TMath::Sqrt(dXMnv*dXMnv+dYMnv*dYMnv+dZMnv*dZMnv);
+
+        double dir_x=dXMnv/lengthMinerva;
+		double dir_y=dYMnv/lengthMinerva;
+		double dir_z=dZMnv/lengthMinerva;
+        double dirXMinerva=dir_x; double dirYMinerva=dir_y; double dirZMinerva=dir_z;
+            
+        double xFrontFace=dir_x/dir_z*(-60-start_z)+start_x;
+        double yFrontFace=dir_y/dir_z*(-60-start_z)+start_y;
+        double xBackFace=dir_x/dir_z*(60-start_z)+start_x;
+        double yBackFace=dir_y/dir_z*(60-start_z)+start_y;
+
+            
 		if (start_z>0  && start_pos.z<59.5 && ((end_pos.z)>62)){
         if (abs(end_pos.x)>60 || abs(end_pos.y)>60) continue;
 
@@ -282,24 +326,20 @@ double deltaExtrapXUSFront=-999; double deltaExtrapYUSFront=-999;
 
 
 		int truthPart=sr->nd.minerva.ixn[i].tracks[j].truth[0].part;
-		double dXMnv=(sr->nd.minerva.ixn[i].tracks[j].end.x-sr->nd.minerva.ixn[i].tracks[j].start.x);
-		double dYMnv=(sr->nd.minerva.ixn[i].tracks[j].end.y-sr->nd.minerva.ixn[i].tracks[j].start.y);
-		double dZMnv=(sr->nd.minerva.ixn[i].tracks[j].end.z-sr->nd.minerva.ixn[i].tracks[j].start.z);
-		double lengthMinerva=TMath::Sqrt(dXMnv*dXMnv+dYMnv*dYMnv+dZMnv*dZMnv);
+
 	        if (lengthMinerva<10) continue;
-          	double dirXMinerva=dXMnv/lengthMinerva;
-		double dirYMinerva=dYMnv/lengthMinerva;
-		double dirZMinerva=dZMnv/lengthMinerva;
-		double dotProduct=dirXMinerva*dirX+dirYMinerva*dirY+dirZ*dirZMinerva;
+
+		double dotProductTemp=dirXMinerva*dirX+dirYMinerva*dirY+dirZ*dirZMinerva;
 		double extrapdZ=start_z-end_pos.z;
-		double extrapY=dirY/dirZ*(extrapdZ)+end_pos.y-start_y-mnvOffsetY;
-		double extrapX=dirX/dirZ*(extrapdZ)+end_pos.x-start_x-mnvOffsetX;
+		double extrapY=dirY/dirZ*(extrapdZ)+end_pos.y-start_y;
+		double extrapX=dirX/dirZ*(extrapdZ)+end_pos.x-start_x;
 		double diffExtrap=TMath::Sqrt(TMath::Power(extrapY-start_y,2));
+        
 
-
-		if (dotProductDS<dotProduct && abs(extrapY)<15 && abs(extrapX)<15  &&  abs(TMath::ATan(dirXMinerva/dirZMinerva)-TMath::ATan(dirX/dirZ))<0.06 && abs(TMath::ATan(dirYMinerva/dirZMinerva)-TMath::ATan(dirY/dirZ))<0.06){ dotProductDS=dotProduct;
+		if (dotProductDS<dotProductTemp && abs(extrapY)<15 && abs(extrapX)<15  &&  abs(TMath::ATan(dirXMinerva/dirZMinerva)-TMath::ATan(dirX/dirZ))<0.06 && abs(TMath::ATan(dirYMinerva/dirZMinerva)-TMath::ATan(dirY/dirZ))<0.06){ dotProductDS=dotProductTemp;
 		deltaExtrapY=extrapY;
 		deltaExtrapX=extrapX;
+        bestEndZDS=end_z;                                                                                                                                                                   bestStartZDS=start_z;            
 		if (mcOnly){
 		maxPartMinerva=sr->nd.minerva.ixn[i].tracks[j].truth[0].part;
 		maxTypeMinerva=sr->nd.minerva.ixn[i].tracks[j].truth[0].type;
@@ -308,28 +348,26 @@ double deltaExtrapXUSFront=-999; double deltaExtrapYUSFront=-999;
 
 		}}
 
-		if (start_z<0 && end_z>0 && ((end_pos.z)<-60 || start_pos.z<-60) && abs(end_pos.z-start_pos.z)>120){
+		if (start_z<0 && end_z>0 && ((end_pos.z)<-60 || (start_pos.z)<-60) && abs(end_pos.z-start_pos.z)>20){
             if (abs(start_pos.x)>60 || abs(start_pos.y)>60 || abs(end_pos.x)>60 || abs(end_pos.y)>60) continue;
 	int truthPart=sr->nd.minerva.ixn[i].tracks[j].truth[0].part;
-		double dXMnv=(sr->nd.minerva.ixn[i].tracks[j].end.x-sr->nd.minerva.ixn[i].tracks[j].start.x);
-		double dYMnv=(sr->nd.minerva.ixn[i].tracks[j].end.y-sr->nd.minerva.ixn[i].tracks[j].start.y);
-		double dZMnv=(sr->nd.minerva.ixn[i].tracks[j].end.z-sr->nd.minerva.ixn[i].tracks[j].start.z);
-		double lengthMinerva=TMath::Sqrt(dXMnv*dXMnv+dYMnv*dYMnv+dZMnv*dZMnv);
+
 		double dirXMinerva=dXMnv/lengthMinerva;
 		double dirYMinerva=dYMnv/lengthMinerva;
 		double dirZMinerva=dZMnv/lengthMinerva;
 		double dotProductTemp=dirXMinerva*dirX+dirYMinerva*dirY+dirZ*dirZMinerva;
 
 		double extrapdZUS=end_z-end_pos.z;
-		double extrapYUS=dirY/dirZ*(extrapdZUS)+end_pos.y-end_y-mnvOffsetY;
-		double extrapXUS=dirX/dirZ*(extrapdZUS)+end_pos.x-end_x-mnvOffsetX;
+		double extrapYUS=dirY/dirZ*(extrapdZUS)+end_pos.y-end_y;
+		double extrapXUS=dirX/dirZ*(extrapdZUS)+end_pos.x-end_x;
 		double extrapdZUSFront=start_z-start_pos.z;
-	        double extrapYUSFront=dirY/dirZ*(extrapdZUSFront)+start_pos.y-start_y-mnvOffsetY;
-                double extrapXUSFront=dirX/dirZ*(extrapdZUSFront)+start_pos.x-start_x-mnvOffsetX;	
+	        double extrapYUSFront=dirY/dirZ*(extrapdZUSFront)+start_pos.y-start_y;
+                double extrapXUSFront=dirX/dirZ*(extrapdZUSFront)+start_pos.x-start_x;	
                 //double diffExtrap=TMath::Sqrt(TMath::Power(extrapY-end_y,2));
 		if (dotProductUS<dotProductTemp  && abs(extrapYUS)<15 && abs(extrapXUS)<15 && abs(TMath::ATan(dirXMinerva/dirZMinerva)-TMath::ATan(dirX/dirZ))<0.06 && abs(TMath::ATan(dirYMinerva/dirZMinerva)-TMath::ATan(dirY/dirZ))<0.06){ dotProductUS=dotProductTemp;
 		deltaExtrapYUS=extrapYUS;
                 deltaExtrapXUS=extrapXUS;
+                                                                                                                                                                                                                             
                 deltaExtrapXUSFront=extrapXUSFront;
                 deltaExtrapYUSFront=extrapYUSFront;
                  bestxFrontFace=xFrontFace;
@@ -337,6 +375,7 @@ double deltaExtrapXUSFront=-999; double deltaExtrapYUSFront=-999;
                  bestyBackFace=yBackFace; 
                 bestMx2Int=i;
                 bestMx2Track=j;
+                                                                                                                                                                                                    bestEndZUS=end_z;
 		if (mcOnly){
                 maxPartMinervaUS=sr->nd.minerva.ixn[i].tracks[j].truth[0].part;
 		maxTypeMinervaUS=sr->nd.minerva.ixn[i].tracks[j].truth[0].type;	
@@ -357,7 +396,11 @@ double deltaExtrapXUSFront=-999; double deltaExtrapYUSFront=-999;
     if ( abs(bestxBackFace)<60 && abs(bestxBackFace)>5 && abs(bestyBackFace)<60){    trackEndDS->Fill(bestxBackFace,bestyBackFace);
                               }
 
-
+       if (mcOnly && maxTypeMinerva==1){
+        int truePDG=sr->mc.nu[maxIxnMinerva].prim[maxPartMinerva].pdg;
+        if (abs(truePDG)==211) truePiZDS->Fill(bestEndZDS);
+        if (abs(truePDG)==13) trueMuZDS->Fill(bestEndZDS);
+       }
          
 	if (mcOnly && maxIxnMinerva==maxIxnNumber && maxPartNumber==maxPartMinerva && maxTypeMinerva==maxTypeNumber){ goodMINERvAMatch++; deltaXGood->Fill(deltaExtrapX); deltaYGood->Fill(deltaExtrapY); dotProductGood->Fill(dotProductDS);
           if (maxTypeMinerva==1){
@@ -392,7 +435,7 @@ double deltaExtrapXUSFront=-999; double deltaExtrapYUSFront=-999;
          matchTPCTrack.push_back(npart);
          matchMx2Track.push_back(bestMx2Track);
          matchMx2Int.push_back(bestMx2Int);
-
+      dotProductPlotUS->Fill(dotProductUS);
          	 deltaXUSFront->Fill(deltaExtrapXUSFront); deltaYUSFront->Fill(deltaExtrapYUSFront);	
          deltaXUS->Fill(deltaExtrapXUS); deltaYUS->Fill(deltaExtrapYUS);
          auto trkStart=start_pos; auto trkEnd=end_pos;
@@ -400,8 +443,14 @@ double deltaExtrapXUSFront=-999; double deltaExtrapYUSFront=-999;
 		trackEndXUS->Fill(trkEnd.x); trackEndYUS->Fill(trkEnd.y); trackEndZUS->Fill(trkEnd.z);
     if (abs(bestxFrontFace)>5 && abs(bestyFrontFace)<60 && abs(bestxFrontFace)<60 && abs(bestxBackFace)>5 && abs(bestyBackFace)<60 && abs(bestxBackFace)<60){    trackEndUS->Fill(bestxBackFace,bestyBackFace);
             trackStartUS->Fill(bestxFrontFace,bestyFrontFace);
-                              }
+                                                                                                                                                             trackdXStartUS->Fill(bestxFrontFace,bestyFrontFace,deltaExtrapXUSFront);                                                                              trackdXEndUS->Fill(bestxBackFace,bestyBackFace,deltaExtrapXUS);                                                                           trackdYStartUS->Fill(bestxFrontFace,bestyFrontFace,deltaExtrapYUSFront);                                                                              trackdYEndUS->Fill(bestxBackFace,bestyBackFace,deltaExtrapYUS);
 
+                              }
+       if (mcOnly && maxTypeMinervaUS==1){
+        int truePDG=sr->mc.nu[maxIxnMinervaUS].prim[maxPartNumber].pdg;
+        if (abs(truePDG)==211) truePiZUS->Fill(bestEndZUS);
+        if (abs(truePDG)==13) trueMuZUS->Fill(bestEndZUS);
+       }
        totalMINERvAMatchUS++; 
  if (mcOnly && maxIxnMinervaUS==maxIxnNumber && maxPartNumber==maxPartMinervaUS && maxTypeMinervaUS==maxTypeNumber){ deltaYGoodUS->Fill(deltaExtrapYUS); deltaXGoodUS->Fill(deltaExtrapXUS); goodMINERvAMatchUS++;} 
               else{ deltaYBadUS->Fill(deltaExtrapYUS); deltaXBadUS->Fill(deltaExtrapXUS); }      
@@ -485,20 +534,16 @@ double deltaExtrapXUSFront=-999; double deltaExtrapYUSFront=-999;
 
       
 	} // interactions
-   if (matchMx2Int.size()<1 && mx2InTheEvent>0){ 
-    runNumber=sr->meta.lar2x2.run;
-           eventNumber=sr->meta.lar2x2.event;
-   missMatchNS=sr->meta.lar2x2.readoutstart_ns;
-   missMatchS=sr->meta.lar2x2.readoutstart_s;
-    tree->Fill();
-   }
+ //   if (matchMx2Int.size()<1 && mx2InTheEvent>0) std::cout<<n<<",";
+    
+
+
   }// end for spills
   
 std::cout<<"Minerva Match Purity US: "<<goodMINERvAMatchUS<<"/"<<totalMINERvAMatchUS<<std::endl;
 std::cout<<"Minerva Match Purity DS: "<<goodMINERvAMatch<<"/"<<totalMINERvAMatch<<std::endl;
 
 std::cout<<trackStartUS->Integral()<<std::endl;
-
 std::cout<<throughGoing<<","<<startingFrom2x2Demonstrator<<std::endl;
 //Create output file and write your histograms
   TFile *caf_out_file = new TFile(output_rootfile.c_str(), "recreate");  
@@ -520,6 +565,11 @@ std::cout<<throughGoing<<","<<startingFrom2x2Demonstrator<<std::endl;
   trackStartYUS->Write();
   trackStartZUS->Write();
   trackStartUS->Write();
+  trackdXStartUS->Write();
+  trackdYStartUS->Write();
+  trackdXEndUS->Write();
+  trackdYEndUS->Write();
+
 
   trackEndXUS->Write();
   trackEndYUS->Write();
@@ -528,7 +578,10 @@ std::cout<<throughGoing<<","<<startingFrom2x2Demonstrator<<std::endl;
 
   deltaXUSFront->Write();
   deltaYUSFront->Write();
-
+   truePiZUS->Write();
+    trueMuZUS->Write();
+       truePiZDS->Write();
+    trueMuZDS->Write();
  mx2EndUS->Write();
       mx2StartUS->Write();
  mx2StartDS->Write();
@@ -536,7 +589,6 @@ std::cout<<throughGoing<<","<<startingFrom2x2Demonstrator<<std::endl;
   totalSpills->Write();
    totalPOT->Fill(0.5,sumPOT);
    totalPOT->Write();
-    tree->Write();
   caf_out_file->Write();
   caf_out_file->Close();
 

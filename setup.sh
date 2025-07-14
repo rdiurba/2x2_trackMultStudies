@@ -1,3 +1,4 @@
+#shifter --image=fermilab/fnal-wn-sl7:latest --module=cvmfs -- /bin/bash
 source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
 
 setup duneanaobj v03_06_01b -q e20:prof

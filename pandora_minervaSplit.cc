@@ -276,7 +276,7 @@ double deltaExtrapXUSFront=-999; double deltaExtrapYUSFront=-999;
 
 
 		if (start_z>0  && start_pos.z<59.5 && ((end_pos.z)>62)){
-        if (abs(end_pos.x)>60 || abs(end_pos.y)>60) continue;
+            if (abs(end_pos.x)>60 || abs(end_pos.y)>60) continue;
 
           //if (/*abs(abs(sr->common.ixn.dlp[nixn].vtx.x)-33)<1 ||*/ abs(sr->common.ixn.dlp[nixn].vtx.x)>59 || abs(sr->common.ixn.dlp[nixn].vtx.x)<5 || abs(sr->common.ixn.dlp[nixn].vtx.y)>57 || abs(sr->common.ixn.dlp[nixn].vtx.z)<5 || abs(sr->common.ixn.dlp[nixn].vtx.z)>59.5)  continue;
 
@@ -308,7 +308,7 @@ double deltaExtrapXUSFront=-999; double deltaExtrapYUSFront=-999;
 
 		}}
 
-		if (start_z<0 && end_z>0 && ((end_pos.z)<-60 || start_pos.z<-60) && abs(end_pos.z-start_pos.z)>120){
+		if (start_z<0 && end_z>0 && ((end_pos.z)<-60 || start_pos.z<-60) && abs(end_pos.z-start_pos.z)>20){
             if (abs(start_pos.x)>60 || abs(start_pos.y)>60 || abs(end_pos.x)>60 || abs(end_pos.y)>60) continue;
 	int truthPart=sr->nd.minerva.ixn[i].tracks[j].truth[0].part;
 		double dXMnv=(sr->nd.minerva.ixn[i].tracks[j].end.x-sr->nd.minerva.ixn[i].tracks[j].start.x);
@@ -496,8 +496,8 @@ double deltaExtrapXUSFront=-999; double deltaExtrapYUSFront=-999;
   
 std::cout<<"Minerva Match Purity US: "<<goodMINERvAMatchUS<<"/"<<totalMINERvAMatchUS<<std::endl;
 std::cout<<"Minerva Match Purity DS: "<<goodMINERvAMatch<<"/"<<totalMINERvAMatch<<std::endl;
-
 std::cout<<trackStartUS->Integral()<<std::endl;
+
 
 std::cout<<throughGoing<<","<<startingFrom2x2Demonstrator<<std::endl;
 //Create output file and write your histograms

@@ -248,6 +248,17 @@ endData->SetTitle("Pandora-Mx2 Through-Going");
 endData->Draw("COLZ");    tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}"); 
 c1.Print("pandoraPlots/exitPositionDataUS.png"); c1.Print("pandoraPlots/exitPositionDataUS.pdf");
 
+    std::cout<<startData->GetNbinsX()<<std::endl;
+    std::cout<<"Total Efficiency"<<std::endl;
+std::cout<<startData->Integral()/mx2StartData->Integral()<<","<<endData->Integral()/mx2EndData->Integral()<<std::endl;
+    std::cout<<"Efficiency x<0"<<std::endl;
+
+std::cout<<startData->Integral(1,7,1,15)/mx2StartData->Integral(1,7,1,15)<<","<<endData->Integral(1,7,1,15)/mx2EndData->Integral(1,7,1,15)<<std::endl;
+        std::cout<<"Efficiency x>0"<<std::endl;
+
+std::cout<<startData->Integral(9,15,1,15)/mx2StartData->Integral(9,15,1,15)<<","<<endData->Integral(9,15,1,15)/mx2EndData->Integral(9,15,1,15)<<std::endl;
+
+    
 startData->Divide(mx2StartData);
 endData->Divide(mx2EndData);
 
@@ -276,7 +287,10 @@ endData->SetTitle("Pandora-Mx2 Through-Going");
 endData->Draw("COLZ");    tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}"); 
 c1.Print("pandoraPlots/exitPositionDataUSEff.png"); c1.Print("pandoraPlots/exitPositionDataUSEff.pdf");
 
+std::cout<<startMC->GetNbinsX()<<std::endl;
+    std::cout<<startMC->Integral()<<","<<mx2StartMC->Integral()<<std::endl;
 
+std::cout<<startMC->Integral()/mx2StartMC->Integral()<<","<<endMC->Integral()/mx2EndMC->Integral()<<std::endl;
     startMC->Divide(mx2StartMC);
 endMC->Divide(mx2EndMC);
 

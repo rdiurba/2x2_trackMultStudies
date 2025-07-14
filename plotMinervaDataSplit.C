@@ -31,7 +31,7 @@
 #include "TEfficiency.h"
 #include <iomanip>
 
-void plotSPINEMinerva()
+void plotMinervaDataSplit()
 {
 
 
@@ -50,8 +50,8 @@ gPad->SetRightMargin(0.15);
 TLatex tL;
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-TFile fMx2("testMinervaSPINE.root");
-TFile fMx2Data("testMinervaSPINEData.root");
+TFile fMx2("testMinervaPandoraSplit.root");
+TFile fMx2Data("testMinervaPandoraDataSplit.root");
 
 TH1D* totalPOTMC=(TH1D*)fMx2.Get("totalPOT");
 totalPOTMC->SetName("totalPOTMC");
@@ -137,15 +137,15 @@ dotProductMC->GetYaxis()->CenterTitle();
 dotProductMC->SetLineColor(kRed);
 dotProductMC->SetMarkerColor(kRed);
 
-std::cout<<dotProductMC->GetEntries()<<","<<dotProductData->GetEntries()<<std::endl;
-std::cout<<totalPOTData->Integral()<<","<<totalPOTMC->Integral()<<std::endl;
+
+
 dotProductMC->Scale(totalPOTData->Integral()/totalPOTMC->Integral());
 dotProductMC->GetYaxis()->SetRangeUser(0,dotProductMC->GetMaximum()*2);
 dotProductMC->GetXaxis()->SetTitle("cos(#theta)");
 dotProductMC->GetYaxis()->SetTitle("Number of Tracks");
-dotProductMC->SetTitle("SPINE-Mx2 Through-Going");
+dotProductMC->SetTitle("Pandora-Mx2 Through-Going");
 dotProductMC->Draw("HIST"); dotProductData->Draw("E0 P SAME");      tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}"); lVertex->Draw("SAME");
-c1.Print("spinePlots/dotProductDataSPINE.png"); c1.Print("spinePlots/dotProductDataSPINE.pdf");
+c1.Print("pandoraPlots/dotProductData.png"); c1.Print("pandoraPlots/dotProductDataSplit.pdf");
 
 
 startXMC->Scale(totalPOTData->Integral()/totalPOTMC->Integral());
@@ -156,9 +156,9 @@ startXMC->SetLineColor(kRed);
 startXMC->SetMarkerColor(kRed);
 startXMC->GetXaxis()->SetTitle("Starting Poisiton X [cm]");
 startXMC->GetYaxis()->SetTitle("Number of Tracks");
-startXMC->SetTitle("SPINE-Mx2 Through-Going");
+startXMC->SetTitle("Pandora-Mx2 Through-Going");
 startXMC->Draw("HIST"); startXData->Draw("E0 P SAME");      tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");  lVertex->Draw("SAME");
-c1.Print("spinePlots/startXDataSPINE.png"); c1.Print("spinePlots/startXDataSPINE.pdf");
+c1.Print("pandoraPlots/startXData.png"); c1.Print("pandoraPlots/startXDataSplit.pdf");
 
 
 startZMC->Scale(totalPOTData->Integral()/totalPOTMC->Integral());
@@ -170,9 +170,9 @@ startZMC->SetLineColor(kRed);
 startZMC->SetMarkerColor(kRed);
 startZMC->GetXaxis()->SetTitle("Starting Position Z [cm]");
 startZMC->GetYaxis()->SetTitle("Number of Tracks");
-startZMC->SetTitle("SPINE-Mx2 Through-Going");
+startZMC->SetTitle("Pandora-Mx2 Through-Going");
 startZMC->Draw("HIST"); startZData->Draw("E0 P SAME");      tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");  lVertex->Draw("SAME");
-c1.Print("spinePlots/startZDataSPINE.png"); c1.Print("spinePlots/startZDataSPINE.pdf");
+c1.Print("pandoraPlots/startZData.png"); c1.Print("pandoraPlots/startZDataSplit.pdf");
 
 startYMC->Scale(totalPOTData->Integral()/totalPOTMC->Integral());
 startYMC->GetYaxis()->SetRangeUser(0,startYMC->GetMaximum()*2);
@@ -182,9 +182,9 @@ startYMC->SetLineColor(kRed);
 startYMC->SetMarkerColor(kRed);
 startYMC->GetXaxis()->SetTitle("Starting Position Y [cm]");
 startYMC->GetYaxis()->SetTitle("Number of Tracks");
-startYMC->SetTitle("SPINE-Mx2 Through-Going");
+startYMC->SetTitle("Pandora-Mx2 Through-Going");
 startYMC->Draw("HIST"); startYData->Draw("E0 P SAME");      tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}"); lVertex->Draw("SAME");
-c1.Print("spinePlots/startYDataSPINE.png"); c1.Print("spinePlots/startYDataSPINE.pdf");
+c1.Print("pandoraPlots/startYData.png"); c1.Print("pandoraPlots/startYDataSplit.pdf");
 
 
 endXMC->Scale(totalPOTData->Integral()/totalPOTMC->Integral());
@@ -195,9 +195,9 @@ endXMC->SetLineColor(kRed);
 endXMC->SetMarkerColor(kRed);
 endXMC->GetXaxis()->SetTitle("Ending Poisiton X [cm]");
 endXMC->GetYaxis()->SetTitle("Number of Tracks");
-endXMC->SetTitle("SPINE-Mx2 Through-Going");
+endXMC->SetTitle("Pandora-Mx2 Through-Going");
 endXMC->Draw("HIST"); endXData->Draw("E0 P SAME");      tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");  lVertex->Draw("SAME");
-c1.Print("spinePlots/endXDataSPINE.png"); c1.Print("spinePlots/endXDataSPINE.pdf");
+c1.Print("pandoraPlots/endXData.png"); c1.Print("pandoraPlots/endXDataSplit.pdf");
 
 
 endZMC->Scale(totalPOTData->Integral()/totalPOTMC->Integral());
@@ -209,9 +209,9 @@ endZMC->SetLineColor(kRed);
 endZMC->SetMarkerColor(kRed);
 endZMC->GetXaxis()->SetTitle("Ending Position Z [cm]");
 endZMC->GetYaxis()->SetTitle("Number of Tracks");
-endZMC->SetTitle("SPINE-Mx2 Through-Going");
+endZMC->SetTitle("Pandora-Mx2 Through-Going");
 endZMC->Draw("HIST"); endZData->Draw("E0 P SAME");      tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");  lVertex->Draw("SAME");
-c1.Print("spinePlots/endZDataSPINE.png"); c1.Print("spinePlots/endZDataSPINE.pdf");
+c1.Print("pandoraPlots/endZData.png"); c1.Print("pandoraPlots/endZDataSplit.pdf");
 
 endYMC->Scale(totalPOTData->Integral()/totalPOTMC->Integral());
 endYMC->GetYaxis()->SetRangeUser(0,endYMC->GetMaximum()*2);
@@ -221,9 +221,9 @@ endYMC->SetLineColor(kRed);
 endYMC->SetMarkerColor(kRed);
 endYMC->GetXaxis()->SetTitle("Ending Position Y [cm]");
 endYMC->GetYaxis()->SetTitle("Number of Tracks");
-endYMC->SetTitle("SPINE-Mx2 Through-Going");
+endYMC->SetTitle("Pandora-Mx2 Through-Going");
 endYMC->Draw("HIST"); endYData->Draw("E0 P SAME");      tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}"); lVertex->Draw("SAME");
-c1.Print("spinePlots/endYDataSPINE.png"); c1.Print("spinePlots/endYDataSPINE.pdf");
+c1.Print("pandoraPlots/endYData.png"); c1.Print("pandoraPlots/endYDataSplit.pdf");
 
 
 startData->GetXaxis()->SetRangeUser(-60,60);
@@ -233,9 +233,9 @@ startData->GetYaxis()->CenterTitle();
 startData->GetYaxis()->SetTitle("Entering Position Y [cm]");
 startData->GetXaxis()->SetTitle("Entering Position X [cm]");
 startData->GetZaxis()->SetTitle("Number of Tracks");
-startData->SetTitle("SPINE-Mx2 Through-Going");
+startData->SetTitle("Pandora-Mx2 Through-Going");
 startData->Draw("COLZ");    tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}"); 
-c1.Print("spinePlots/startPositionDataUSSPINE.png"); c1.Print("spinePlots/startPositionDataUSSPINE.pdf");
+c1.Print("pandoraPlots/startPositionDataUS.png"); c1.Print("pandoraPlots/startPositionDataUSSplit.pdf");
 
 endData->GetXaxis()->SetRangeUser(-60,60);
 endData->GetYaxis()->SetRangeUser(-60,60);
@@ -244,10 +244,9 @@ endData->GetYaxis()->CenterTitle();
 endData->GetYaxis()->SetTitle("Exiting Position Y [cm]");
 endData->GetXaxis()->SetTitle("Exiting Position X [cm]");
 endData->GetZaxis()->SetTitle("Number of Tracks");
-endData->SetTitle("SPINE-Mx2 Through-Going");
+endData->SetTitle("Pandora-Mx2 Through-Going");
 endData->Draw("COLZ");    tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}"); 
-c1.Print("spinePlots/exitPositionDataUSSPINE.png"); c1.Print("spinePlots/exitPositionDataUSSPINE.pdf");
-
+c1.Print("pandoraPlots/exitPositionDataUS.png"); c1.Print("pandoraPlots/exitPositionDataUSSplit.pdf");
 
     std::cout<<startData->GetNbinsX()<<std::endl;
     std::cout<<"Total Efficiency"<<std::endl;
@@ -258,6 +257,7 @@ std::cout<<startData->Integral(1,7,1,15)/mx2StartData->Integral(1,7,1,15)<<","<<
         std::cout<<"Efficiency x>0"<<std::endl;
 
 std::cout<<startData->Integral(9,15,1,15)/mx2StartData->Integral(9,15,1,15)<<","<<endData->Integral(9,15,1,15)/mx2EndData->Integral(9,15,1,15)<<std::endl;
+
     
 startData->Divide(mx2StartData);
 endData->Divide(mx2EndData);
@@ -270,10 +270,10 @@ startData->GetYaxis()->CenterTitle();
 startData->GetYaxis()->SetTitle("Entering Position Y [cm]");
 startData->GetXaxis()->SetTitle("Entering Position X [cm]");
 startData->GetZaxis()->SetTitle("Matched TPC Tracks/Mx2 Tracks");
-    startData->SetTitle("SPINE-Mx2 Through-Going");
+    startData->SetTitle("Pandora-Mx2 Through First Modules");
     startData->GetZaxis()->SetRangeUser(0,1.0);
 startData->Draw("COLZ");    tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}"); 
-c1.Print("spinePlots/startPositionDataUSEffSPINE.png"); c1.Print("spinePlots/startPositionDataUSEffSPINE.pdf");
+c1.Print("pandoraPlots/startPositionDataUSEff.png"); c1.Print("pandoraPlots/startPositionDataUSEffSplit.pdf");
 
 endData->GetXaxis()->SetRangeUser(-60,60);
 endData->GetYaxis()->SetRangeUser(-60,60);
@@ -281,13 +281,14 @@ endData->GetXaxis()->CenterTitle();
 endData->GetYaxis()->CenterTitle();
 
 endData->GetZaxis()->SetTitle("Matched TPC Tracks/Mx2 Tracks");
-endData->SetTitle("SPINE-Mx2 Through-Going");
+endData->SetTitle("Pandora-Mx2 Through First Modules");
         endData->GetZaxis()->SetRangeUser(0,1.0);
 
 endData->Draw("COLZ");    tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}"); 
-c1.Print("spinePlots/exitPositionDataUSEffSPINE.png"); c1.Print("spinePlots/exitPositionDataUSEffSPINE.pdf");
+c1.Print("pandoraPlots/exitPositionDataUSEff.png"); c1.Print("pandoraPlots/exitPositionDataUSEffSplit.pdf");
 
 std::cout<<startMC->GetNbinsX()<<std::endl;
+std::cout<<startMC->Integral()<<","<<mx2StartMC->Integral()<<std::endl;
 std::cout<<startMC->Integral()/mx2StartMC->Integral()<<","<<endMC->Integral()/mx2EndMC->Integral()<<std::endl;
     startMC->Divide(mx2StartMC);
 endMC->Divide(mx2EndMC);
@@ -300,10 +301,10 @@ startMC->GetYaxis()->CenterTitle();
 startMC->GetYaxis()->SetTitle("Entering Position Y [cm]");
 startMC->GetXaxis()->SetTitle("Entering Position X [cm]");
 startMC->GetZaxis()->SetTitle("Matched TPC Tracks/Mx2 Tracks");
-    startMC->SetTitle("SPINE Through-Going MC");
+    startMC->SetTitle("Pandora Through First Modules MC");
     startMC->GetZaxis()->SetRangeUser(0,1.0);
 startMC->Draw("COLZ");    tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}"); 
-c1.Print("spinePlots/startPositionMCUSEffSPINE.png"); c1.Print("spinePlots/startPositionMCUSEffSPINE.pdf");
+c1.Print("pandoraPlots/startPositionMCUSEff.png"); c1.Print("pandoraPlots/startPositionMCUSEffSplit.pdf");
 
 endMC->GetXaxis()->SetRangeUser(-60,60);
 endMC->GetYaxis()->SetRangeUser(-60,60);
@@ -312,11 +313,11 @@ endMC->GetYaxis()->CenterTitle();
 endMC->GetYaxis()->SetTitle("Exiting Position Y [cm]");
 endMC->GetXaxis()->SetTitle("Exiting Position X [cm]");
 endMC->GetZaxis()->SetTitle("Matched TPC Tracks/Mx2 Tracks");
-endMC->SetTitle("SPINE Through-Going MC");
+endMC->SetTitle("Pandora Through First Modules MC");
         endMC->GetZaxis()->SetRangeUser(0,1.0);
 
 endMC->Draw("COLZ");    tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}"); 
-c1.Print("spinePlots/exitPositionMCUSEffSPINE.png"); c1.Print("spinePlots/exitPositionMCUSEffSPINE.pdf");
+c1.Print("pandoraPlots/exitPositionMCUSEff.png"); c1.Print("pandoraPlots/exitPositionMCUSEffSplit.pdf");
 
 
 }

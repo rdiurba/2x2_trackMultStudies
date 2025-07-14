@@ -31,7 +31,7 @@
 #include "TEfficiency.h"
 #include <iomanip>
 
-void plotSPINEMinerva()
+void plotSPINEMinervaSplit()
 {
 
 
@@ -50,8 +50,8 @@ gPad->SetRightMargin(0.15);
 TLatex tL;
     tL.SetNDC();
     tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");
-TFile fMx2("testMinervaSPINE.root");
-TFile fMx2Data("testMinervaSPINEData.root");
+TFile fMx2("testMinervaSPINESplit.root");
+TFile fMx2Data("testMinervaSPINEDataSplit.root");
 
 TH1D* totalPOTMC=(TH1D*)fMx2.Get("totalPOT");
 totalPOTMC->SetName("totalPOTMC");
@@ -145,7 +145,7 @@ dotProductMC->GetXaxis()->SetTitle("cos(#theta)");
 dotProductMC->GetYaxis()->SetTitle("Number of Tracks");
 dotProductMC->SetTitle("SPINE-Mx2 Through-Going");
 dotProductMC->Draw("HIST"); dotProductData->Draw("E0 P SAME");      tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}"); lVertex->Draw("SAME");
-c1.Print("spinePlots/dotProductDataSPINE.png"); c1.Print("spinePlots/dotProductDataSPINE.pdf");
+c1.Print("spinePlots/dotProductDataSPINESplit.png"); c1.Print("spinePlots/dotProductDataSPINESplit.pdf");
 
 
 startXMC->Scale(totalPOTData->Integral()/totalPOTMC->Integral());
@@ -158,7 +158,7 @@ startXMC->GetXaxis()->SetTitle("Starting Poisiton X [cm]");
 startXMC->GetYaxis()->SetTitle("Number of Tracks");
 startXMC->SetTitle("SPINE-Mx2 Through-Going");
 startXMC->Draw("HIST"); startXData->Draw("E0 P SAME");      tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");  lVertex->Draw("SAME");
-c1.Print("spinePlots/startXDataSPINE.png"); c1.Print("spinePlots/startXDataSPINE.pdf");
+c1.Print("spinePlots/startXDataSPINESplit.png"); c1.Print("spinePlots/startXDataSPINESplit.pdf");
 
 
 startZMC->Scale(totalPOTData->Integral()/totalPOTMC->Integral());
@@ -172,7 +172,7 @@ startZMC->GetXaxis()->SetTitle("Starting Position Z [cm]");
 startZMC->GetYaxis()->SetTitle("Number of Tracks");
 startZMC->SetTitle("SPINE-Mx2 Through-Going");
 startZMC->Draw("HIST"); startZData->Draw("E0 P SAME");      tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");  lVertex->Draw("SAME");
-c1.Print("spinePlots/startZDataSPINE.png"); c1.Print("spinePlots/startZDataSPINE.pdf");
+c1.Print("spinePlots/startZDataSPINESplit.png"); c1.Print("spinePlots/startZDataSPINESplit.pdf");
 
 startYMC->Scale(totalPOTData->Integral()/totalPOTMC->Integral());
 startYMC->GetYaxis()->SetRangeUser(0,startYMC->GetMaximum()*2);
@@ -184,7 +184,7 @@ startYMC->GetXaxis()->SetTitle("Starting Position Y [cm]");
 startYMC->GetYaxis()->SetTitle("Number of Tracks");
 startYMC->SetTitle("SPINE-Mx2 Through-Going");
 startYMC->Draw("HIST"); startYData->Draw("E0 P SAME");      tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}"); lVertex->Draw("SAME");
-c1.Print("spinePlots/startYDataSPINE.png"); c1.Print("spinePlots/startYDataSPINE.pdf");
+c1.Print("spinePlots/startYDataSPINESplit.png"); c1.Print("spinePlots/startYDataSPINESplit.pdf");
 
 
 endXMC->Scale(totalPOTData->Integral()/totalPOTMC->Integral());
@@ -197,7 +197,7 @@ endXMC->GetXaxis()->SetTitle("Ending Poisiton X [cm]");
 endXMC->GetYaxis()->SetTitle("Number of Tracks");
 endXMC->SetTitle("SPINE-Mx2 Through-Going");
 endXMC->Draw("HIST"); endXData->Draw("E0 P SAME");      tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");  lVertex->Draw("SAME");
-c1.Print("spinePlots/endXDataSPINE.png"); c1.Print("spinePlots/endXDataSPINE.pdf");
+c1.Print("spinePlots/endXDataSPINESplit.png"); c1.Print("spinePlots/endXDataSPINESplit.pdf");
 
 
 endZMC->Scale(totalPOTData->Integral()/totalPOTMC->Integral());
@@ -211,7 +211,7 @@ endZMC->GetXaxis()->SetTitle("Ending Position Z [cm]");
 endZMC->GetYaxis()->SetTitle("Number of Tracks");
 endZMC->SetTitle("SPINE-Mx2 Through-Going");
 endZMC->Draw("HIST"); endZData->Draw("E0 P SAME");      tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}");  lVertex->Draw("SAME");
-c1.Print("spinePlots/endZDataSPINE.png"); c1.Print("spinePlots/endZDataSPINE.pdf");
+c1.Print("spinePlots/endZDataSPINESplit.png"); c1.Print("spinePlots/endZDataSPINESplit.pdf");
 
 endYMC->Scale(totalPOTData->Integral()/totalPOTMC->Integral());
 endYMC->GetYaxis()->SetRangeUser(0,endYMC->GetMaximum()*2);
@@ -223,7 +223,7 @@ endYMC->GetXaxis()->SetTitle("Ending Position Y [cm]");
 endYMC->GetYaxis()->SetTitle("Number of Tracks");
 endYMC->SetTitle("SPINE-Mx2 Through-Going");
 endYMC->Draw("HIST"); endYData->Draw("E0 P SAME");      tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}"); lVertex->Draw("SAME");
-c1.Print("spinePlots/endYDataSPINE.png"); c1.Print("spinePlots/endYDataSPINE.pdf");
+c1.Print("spinePlots/endYDataSPINESplit.png"); c1.Print("spinePlots/endYDataSPINESplit.pdf");
 
 
 startData->GetXaxis()->SetRangeUser(-60,60);
@@ -235,7 +235,7 @@ startData->GetXaxis()->SetTitle("Entering Position X [cm]");
 startData->GetZaxis()->SetTitle("Number of Tracks");
 startData->SetTitle("SPINE-Mx2 Through-Going");
 startData->Draw("COLZ");    tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}"); 
-c1.Print("spinePlots/startPositionDataUSSPINE.png"); c1.Print("spinePlots/startPositionDataUSSPINE.pdf");
+c1.Print("spinePlots/startPositionDataUSSPINESplit.png"); c1.Print("spinePlots/startPositionDataUSSPINESplit.pdf");
 
 endData->GetXaxis()->SetRangeUser(-60,60);
 endData->GetYaxis()->SetRangeUser(-60,60);
@@ -246,8 +246,7 @@ endData->GetXaxis()->SetTitle("Exiting Position X [cm]");
 endData->GetZaxis()->SetTitle("Number of Tracks");
 endData->SetTitle("SPINE-Mx2 Through-Going");
 endData->Draw("COLZ");    tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}"); 
-c1.Print("spinePlots/exitPositionDataUSSPINE.png"); c1.Print("spinePlots/exitPositionDataUSSPINE.pdf");
-
+c1.Print("spinePlots/exitPositionDataUSSPINESplit.png"); c1.Print("spinePlots/exitPositionDataUSSPINESplit.pdf");
 
     std::cout<<startData->GetNbinsX()<<std::endl;
     std::cout<<"Total Efficiency"<<std::endl;
@@ -258,7 +257,7 @@ std::cout<<startData->Integral(1,7,1,15)/mx2StartData->Integral(1,7,1,15)<<","<<
         std::cout<<"Efficiency x>0"<<std::endl;
 
 std::cout<<startData->Integral(9,15,1,15)/mx2StartData->Integral(9,15,1,15)<<","<<endData->Integral(9,15,1,15)/mx2EndData->Integral(9,15,1,15)<<std::endl;
-    
+
 startData->Divide(mx2StartData);
 endData->Divide(mx2EndData);
 
@@ -270,10 +269,10 @@ startData->GetYaxis()->CenterTitle();
 startData->GetYaxis()->SetTitle("Entering Position Y [cm]");
 startData->GetXaxis()->SetTitle("Entering Position X [cm]");
 startData->GetZaxis()->SetTitle("Matched TPC Tracks/Mx2 Tracks");
-    startData->SetTitle("SPINE-Mx2 Through-Going");
+    startData->SetTitle("SPINE-Mx2 Through First Modules");
     startData->GetZaxis()->SetRangeUser(0,1.0);
 startData->Draw("COLZ");    tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}"); 
-c1.Print("spinePlots/startPositionDataUSEffSPINE.png"); c1.Print("spinePlots/startPositionDataUSEffSPINE.pdf");
+c1.Print("spinePlots/startPositionDataUSEffSPINESplit.png"); c1.Print("spinePlots/startPositionDataUSEffSPINESplit.pdf");
 
 endData->GetXaxis()->SetRangeUser(-60,60);
 endData->GetYaxis()->SetRangeUser(-60,60);
@@ -281,14 +280,16 @@ endData->GetXaxis()->CenterTitle();
 endData->GetYaxis()->CenterTitle();
 
 endData->GetZaxis()->SetTitle("Matched TPC Tracks/Mx2 Tracks");
-endData->SetTitle("SPINE-Mx2 Through-Going");
+endData->SetTitle("SPINE-Mx2 Through First Modules");
         endData->GetZaxis()->SetRangeUser(0,1.0);
 
 endData->Draw("COLZ");    tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}"); 
-c1.Print("spinePlots/exitPositionDataUSEffSPINE.png"); c1.Print("spinePlots/exitPositionDataUSEffSPINE.pdf");
-
+c1.Print("spinePlots/exitPositionDataUSEffSPINESplit.png"); c1.Print("spinePlots/exitPositionDataUSEffSPINESplit.pdf");
 std::cout<<startMC->GetNbinsX()<<std::endl;
 std::cout<<startMC->Integral()/mx2StartMC->Integral()<<","<<endMC->Integral()/mx2EndMC->Integral()<<std::endl;
+
+
+
     startMC->Divide(mx2StartMC);
 endMC->Divide(mx2EndMC);
 
@@ -300,10 +301,10 @@ startMC->GetYaxis()->CenterTitle();
 startMC->GetYaxis()->SetTitle("Entering Position Y [cm]");
 startMC->GetXaxis()->SetTitle("Entering Position X [cm]");
 startMC->GetZaxis()->SetTitle("Matched TPC Tracks/Mx2 Tracks");
-    startMC->SetTitle("SPINE Through-Going MC");
+    startMC->SetTitle("SPINE Muons Through First Modules MC");
     startMC->GetZaxis()->SetRangeUser(0,1.0);
 startMC->Draw("COLZ");    tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}"); 
-c1.Print("spinePlots/startPositionMCUSEffSPINE.png"); c1.Print("spinePlots/startPositionMCUSEffSPINE.pdf");
+c1.Print("spinePlots/startPositionMCUSEffSPINESplit.png"); c1.Print("spinePlots/startPositionMCUSEffSPINESplit.pdf");
 
 endMC->GetXaxis()->SetRangeUser(-60,60);
 endMC->GetYaxis()->SetRangeUser(-60,60);
@@ -312,11 +313,10 @@ endMC->GetYaxis()->CenterTitle();
 endMC->GetYaxis()->SetTitle("Exiting Position Y [cm]");
 endMC->GetXaxis()->SetTitle("Exiting Position X [cm]");
 endMC->GetZaxis()->SetTitle("Matched TPC Tracks/Mx2 Tracks");
-endMC->SetTitle("SPINE Through-Going MC");
+endMC->SetTitle("SPINE Muons Through First Modules MC");
         endMC->GetZaxis()->SetRangeUser(0,1.0);
 
 endMC->Draw("COLZ");    tL.DrawLatex(0.20,0.94,"#bf{DUNE:ND-LAr 2x2}"); 
-c1.Print("spinePlots/exitPositionMCUSEffSPINE.png"); c1.Print("spinePlots/exitPositionMCUSEffSPINE.pdf");
-
+c1.Print("spinePlots/exitPositionMCUSEffSPINESplit.png"); c1.Print("spinePlots/exitPositionMCUSEffSPINESplit.pdf");
 
 }
