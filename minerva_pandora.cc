@@ -9,7 +9,6 @@
 #include <string>
 #include "duneanaobj/StandardRecord/StandardRecord.h" //Ideally, this should be SRProxy.h, but there is an include error for that now. Alternatively, you can use SetBranchStatus function in TreeLoader, but it does not work for the common branch (to do)
 
-
        double mnvOffsetXBack=-11; double mnvOffsetYBack=5.2;
              double mnvOffsetXFront=-4.2; double mnvOffsetYFront=4.2;
   bool Passes_cut(caf::SRTrack track_minerva, double x1_lar, double x2_lar, double y1_lar, double y2_lar, double z1_lar, double z2_lar, double &costheta, double &residual)
@@ -38,6 +37,7 @@
 
     double y2_minerva=track_minerva.end.y+offsetYEnd;
     double y1_minerva=track_minerva.start.y+offsetYStart;
+
     double dX=x2_lar-x1_lar;
     double dY=y2_lar-y1_lar;
     double dZ=z2_lar-z1_lar;
@@ -181,7 +181,6 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile, bool m
 	caf_chain->GetEntry(n); //Get spill from tree
      sumPOT=sr->beam.pulsepot/1e13+sumPOT;
 
-
        if (mcOnly){ mnvOffsetXBack=0; mnvOffsetYBack=0; mnvOffsetXFront=0; mnvOffsetYFront=0;}
 
       	 for(int i=0; i<sr->nd.minerva.ixn.size(); i++){
@@ -239,46 +238,46 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile, bool m
 
 
 	
-	for(long unsigned nixn = 0; nixn < sr->common.ixn.dlp.size(); nixn++){
+	for(long unsigned nixn = 0; nixn < sr->common.ixn.pandora.size(); nixn++){
           double biggestMatch=-999; int biggestMatchIndex=-999; double maxDotProductDS=-999; double maxDotProductUS=-999;   
             int maxEventPar=-999; int maxEventTyp=-9999; int maxEventIxn=-999;
            if (mcOnly){
-           for (int ntruth=0; ntruth<sr->common.ixn.dlp[nixn].truth.size(); ntruth++){
+           for (int ntruth=0; ntruth<sr->common.ixn.pandora[nixn].truth.size(); ntruth++){
           
-          if (biggestMatch<sr->common.ixn.dlp[nixn].truthOverlap.at(ntruth)){
+          if (biggestMatch<sr->common.ixn.pandora[nixn].truthOverlap.at(ntruth)){
           
-          biggestMatch=sr->common.ixn.dlp[nixn].truthOverlap.at(ntruth);
-          biggestMatchIndex=sr->common.ixn.dlp[nixn].truth.at(ntruth);
+          biggestMatch=sr->common.ixn.pandora[nixn].truthOverlap.at(ntruth);
+          biggestMatchIndex=sr->common.ixn.pandora[nixn].truth.at(ntruth);
            //std::cout<<"Biggest Match: "<<biggestMatch<<std::endl;
 
 
 		}
 		}
  		}
-    	for(long unsigned npart=0; npart < sr->common.ixn.dlp[nixn].part.dlp.size(); npart++){ //loop over particles
-              //if (!sr->common.ixn.dlp[nixn].part.dlp[npart].primary) continue; 
-               int pdg=sr->common.ixn.dlp[nixn].part.dlp[npart].pdg;
+    	for(long unsigned npart=0; npart < sr->common.ixn.pandora[nixn].part.pandora.size(); npart++){ //loop over particles
+              //if (!sr->common.ixn.pandora[nixn].part.pandora[npart].primary) continue; 
+               int pdg=sr->common.ixn.pandora[nixn].part.pandora[npart].pdg;
                 //pdg=13;
             //std::cout<<pdg<<std::endl;
 		int maxIxnNumber=-9999; int maxPartNumber=-999; int maxTypeNumber=-999; int correctTrack=2;
-		if ( (pdg!=11 && pdg!=111 && pdg!=22)){
+		if ( (pdg!=-2)){
 			if (mcOnly){
-                        auto truthSize=sr->common.ixn.dlp[nixn].part.dlp[npart].truth.size();
+                        auto truthSize=sr->common.ixn.pandora[nixn].part.pandora[npart].truth.size();
 			double maxPartTruthOverlap=0;
 			for (int backTrack=0; backTrack<truthSize; backTrack++){
-			int parType=sr->common.ixn.dlp[nixn].part.dlp[npart].truth[backTrack].type;
-			int partNumber=sr->common.ixn.dlp[nixn].part.dlp[npart].truth[backTrack].part;
-			int interactionNumber=sr->common.ixn.dlp[nixn].part.dlp[npart].truth[backTrack].ixn;
-			double  partTruthOverlap=sr->common.ixn.dlp[nixn].part.dlp[npart].truthOverlap[backTrack];
+			int parType=sr->common.ixn.pandora[nixn].part.pandora[npart].truth[backTrack].type;
+			int partNumber=sr->common.ixn.pandora[nixn].part.pandora[npart].truth[backTrack].part;
+			int interactionNumber=sr->common.ixn.pandora[nixn].part.pandora[npart].truth[backTrack].ixn;
+			double  partTruthOverlap=sr->common.ixn.pandora[nixn].part.pandora[npart].truthOverlap[backTrack];
 			//std::cout<<"Truth has overlap of: "<<partTruthOverlap<<std::endl;
 			if (maxPartTruthOverlap<partTruthOverlap){maxPartTruthOverlap=partTruthOverlap;}
 			}
 
 			for (int backTrack=0; backTrack<truthSize; backTrack++){
-			int parType=sr->common.ixn.dlp[nixn].part.dlp[npart].truth[backTrack].type;
-			int partNumber=sr->common.ixn.dlp[nixn].part.dlp[npart].truth[backTrack].part;
-			int interactionNumber=sr->common.ixn.dlp[nixn].part.dlp[npart].truth[backTrack].ixn;
-			double  partTruthOverlap=sr->common.ixn.dlp[nixn].part.dlp[npart].truthOverlap[backTrack];
+			int parType=sr->common.ixn.pandora[nixn].part.pandora[npart].truth[backTrack].type;
+			int partNumber=sr->common.ixn.pandora[nixn].part.pandora[npart].truth[backTrack].part;
+			int interactionNumber=sr->common.ixn.pandora[nixn].part.pandora[npart].truth[backTrack].ixn;
+			double  partTruthOverlap=sr->common.ixn.pandora[nixn].part.pandora[npart].truthOverlap[backTrack];
 
 			int backtracked=-9999;
 			if (partTruthOverlap>0.5){  
@@ -286,7 +285,7 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile, bool m
 			maxTypeNumber=parType;
                         maxIxnNumber=interactionNumber;
 			if (parType<3){ backtracked=sr->mc.nu[interactionNumber].prim[partNumber].pdg;
-                        //std::cout<<sr->common.ixn.dlp[nixn].part.dlp[npart].start.z<<","<<sr->mc.nu[maxIxnNumber].prim[maxPartNumber].start_pos.z<<std::endl;
+                        //std::cout<<sr->common.ixn.pandora[nixn].part.pandora[npart].start.z<<","<<sr->mc.nu[maxIxnNumber].prim[maxPartNumber].start_pos.z<<std::endl;
 
 			}
 			else backtracked=sr->mc.nu[interactionNumber].sec[partNumber].pdg;
@@ -306,12 +305,12 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile, bool m
 			}
                 //if (maxPartTruthOverlap<0.5) continue;
 
-	       auto start_pos=sr->common.ixn.dlp[nixn].part.dlp[npart].start;
-	       auto end_pos=sr->common.ixn.dlp[nixn].part.dlp[npart].end;
+	       auto start_pos=sr->common.ixn.pandora[nixn].part.pandora[npart].start;
+	       auto end_pos=sr->common.ixn.pandora[nixn].part.pandora[npart].end;
 
-		double diffVertexdZ=abs(start_pos.z-sr->common.ixn.dlp[nixn].vtx.z);
-		double diffVertexdX=abs(start_pos.x-sr->common.ixn.dlp[nixn].vtx.x);
-		double diffVertexdY=abs(start_pos.y-sr->common.ixn.dlp[nixn].vtx.y);
+		double diffVertexdZ=abs(start_pos.z-sr->common.ixn.pandora[nixn].vtx.z);
+		double diffVertexdX=abs(start_pos.x-sr->common.ixn.pandora[nixn].vtx.x);
+		double diffVertexdY=abs(start_pos.y-sr->common.ixn.pandora[nixn].vtx.y);
 		double diffVertex=TMath::Sqrt(diffVertexdZ*diffVertexdZ+diffVertexdY*diffVertexdY+diffVertexdX*diffVertexdX);
         //    std::cout<<start_pos.z<<","<<end_pos.z<<std::endl;
 		//if (diffVertex>5) continue;
@@ -340,7 +339,7 @@ double deltaExtrapXUSFront=-999; double deltaExtrapYUSFront=-999;
         	 	for(int i=0; i<sr->nd.trkmatch.extrap.size(); i++){
                 if (sr->nd.trkmatch.extrap[i].larid.ixn==nixn && sr->nd.trkmatch.extrap[i].larid.reco==1){
                     int index=sr->nd.trkmatch.extrap[i].larid.idx;
-                    if (sr->nd.lar.dlp[nixn].tracks[index].start.z==sr->common.ixn.dlp[nixn].part.dlp[npart].start.z && sr->nd.lar.dlp[nixn].tracks[index].end.z==sr->common.ixn.dlp[nixn].part.dlp[npart].end.z){
+                    if (sr->nd.lar.pandora[nixn].tracks[index].start.z==sr->common.ixn.pandora[nixn].part.pandora[npart].start.z && sr->nd.lar.pandora[nixn].tracks[index].end.z==sr->common.ixn.pandora[nixn].part.pandora[npart].end.z){
                     double angldispl=abs(sr->nd.trkmatch.extrap[i].angdispl);
                     if (dotProductFromCAF<angldispl) dotProductFromCAF=angldispl;
                 }}
@@ -354,9 +353,9 @@ double deltaExtrapXUSFront=-999; double deltaExtrapYUSFront=-999;
         double dotProductTemp=0;
         double trackDispl=0;
         bool pass=Passes_cut(sr->nd.minerva.ixn[i].tracks[j], start_pos.x,end_pos.x,start_pos.y,end_pos.y,start_pos.z, end_pos.z, dotProductTemp, trackDispl);
-        if (!pass) continue;
+        if (mcOnly &&  !pass) continue;
         dotProductTemp=abs(dotProductTemp);
-        if (mcOnly && abs(dotProductTemp-dotProductFromCAF)>0.0001) continue;
+        if (abs(dotProductTemp-dotProductFromCAF)>0.0001) continue;
 		double end_z=sr->nd.minerva.ixn[i].tracks[j].end.z;
 		double start_z=sr->nd.minerva.ixn[i].tracks[j].start.z;
         double offsetYStart=mnvOffsetYFront; double offsetXStart=mnvOffsetXFront;
@@ -396,7 +395,7 @@ double deltaExtrapXUSFront=-999; double deltaExtrapYUSFront=-999;
 		if (start_z>0  && start_pos.z<59.5 && ((end_pos.z)>62)){
         if (abs(end_pos.x)>60 || abs(end_pos.y)>60) continue;
 
-          //if (/*abs(abs(sr->common.ixn.dlp[nixn].vtx.x)-33)<1 ||*/ abs(sr->common.ixn.dlp[nixn].vtx.x)>59 || abs(sr->common.ixn.dlp[nixn].vtx.x)<5 || abs(sr->common.ixn.dlp[nixn].vtx.y)>57 || abs(sr->common.ixn.dlp[nixn].vtx.z)<5 || abs(sr->common.ixn.dlp[nixn].vtx.z)>59.5)  continue;
+          //if (/*abs(abs(sr->common.ixn.pandora[nixn].vtx.x)-33)<1 ||*/ abs(sr->common.ixn.pandora[nixn].vtx.x)>59 || abs(sr->common.ixn.pandora[nixn].vtx.x)<5 || abs(sr->common.ixn.pandora[nixn].vtx.y)>57 || abs(sr->common.ixn.pandora[nixn].vtx.z)<5 || abs(sr->common.ixn.pandora[nixn].vtx.z)>59.5)  continue;
 
 
 		int truthPart=sr->nd.minerva.ixn[i].tracks[j].truth[0].part;
@@ -421,7 +420,7 @@ double deltaExtrapXUSFront=-999; double deltaExtrapYUSFront=-999;
 
 		}}
 
-		if (start_z<0 && end_z>0 && ((end_pos.z)<-60 || start_pos.z<-60) && abs(end_pos.z-start_pos.z)>20){
+		if (start_z<0 && end_z>0 && ((end_pos.z)<-60 || start_pos.z<-60) && abs(end_pos.z-start_pos.z)>120){
             if (abs(start_pos.x)>60 || abs(start_pos.y)>60 || abs(end_pos.x)>60 || abs(end_pos.y)>60) continue;
 	int truthPart=sr->nd.minerva.ixn[i].tracks[j].truth[0].part;
 
@@ -538,8 +537,8 @@ double deltaExtrapXUSFront=-999; double deltaExtrapYUSFront=-999;
       /* 
       if (matchMx2Int.size()==1){
             int nixn=matchTPCInt.at(0); int npart=matchTPCTrack.at(0); int i=matchMx2Int.at(0); int j=matchMx2Track.at(0);
-	       auto trkStart=sr->common.ixn.dlp[nixn].part.dlp[npart].start;
-	       auto trkEnd=sr->common.ixn.dlp[nixn].part.dlp[npart].end;
+	       auto trkStart=sr->common.ixn.pandora[nixn].part.pandora[npart].start;
+	       auto trkEnd=sr->common.ixn.pandora[nixn].part.pandora[npart].end;
 
 
 		double dir_z=sr->nd.minerva.ixn[i].tracks[j].dir.z;

@@ -20,6 +20,70 @@
 
 double minTrkLength = 3;
 
+  bool Passes_cut(caf::SRTrack track_minerva, double x1_lar, double x2_lar, double y1_lar, double y2_lar, double z1_lar, double z2_lar, double &costheta, double &residual)
+  {
+
+    double z_extr=-70;
+    double d_x = 17;
+    double d_y = 19;
+    double d_thetax =0.08;
+    double d_thetay=0.09;
+      
+    double x1_minerva = track_minerva.start.x;
+    double x2_minerva = track_minerva.end.x;
+    double y1_minerva = track_minerva.start.y;
+    double y2_minerva = track_minerva.end.y;
+    double z1_minerva = track_minerva.start.z;
+    double z2_minerva = track_minerva.end.z;
+
+    double dX=x2_lar-x1_lar;
+    double dY=y2_lar-y1_lar;
+    double dZ=z2_lar-z1_lar;
+    double track_LarLen=TMath::Sqrt(dX*dX+dY*dY+dZ*dZ);
+
+    /*
+    The experimental setup: Liquid Argon Detector is placed betbeen two MINERvA planes.
+    To define matching criteria it is needed to find angles between LAr and MINERvA tracks.
+    For LAr detector resolution is diffeent in X and Y direction, therefore it is needed to find angles between tracks
+    as finction of the angle in X direction and as the function of an angle in Y direction. Distances between tracks
+    will be calculated as distancec between extrapolated points - points of intersection of LAr and MINERvA tracls with
+    the plane (parallel to plane XY) of LAr detector.
+    */
+
+    double tg_theta_mn_x = (x2_minerva - x1_minerva) / (z2_minerva - z1_minerva); // tangent of an angle between minerva track and X-axis
+    double tg_theta_mn_y = (y2_minerva - y1_minerva) / (z2_minerva - z1_minerva); // tangent of an angle between minerva track and Y-axis
+    double theta_mn_x = atan(tg_theta_mn_x);                                      // angle between minerva track and X-axis
+    double theta_mn_y = atan(tg_theta_mn_y);                                      // angle between minerva track and Y-axis
+
+    double tg_theta_nd_x = (x2_lar - x1_lar) / (z2_lar - z1_lar); // tangent of the angle between LAr track and X-axis
+    double tg_theta_nd_y = (y2_lar - y1_lar) / (z2_lar - z1_lar); // tangent of the angle between LAr track and Y-axis
+    double theta_nd_x = atan(tg_theta_nd_x);                      // angle between LAr track and X-axis
+    double theta_nd_y = atan(tg_theta_nd_y);                      // angle between LAr track and Y-axis
+
+    double delta_theta_x = theta_mn_y - theta_nd_y;
+    double delta_theta_y = theta_mn_x - theta_nd_x;
+
+    // Extrapolating Both tracks to the same point z = zextr (here it's the front of Lar)
+    double t_mn = (z_extr - z1_minerva) / (z2_minerva - z1_minerva);
+    double x_mn = t_mn * (x2_minerva - x1_minerva) + x1_minerva; // X-coordinate of extrapolated point of LAr track
+    double y_mn = t_mn * (y2_minerva - y1_minerva) + y1_minerva; // Y-coordinate of extrapolated point of LAr track
+
+    double t_nd = (z_extr - z1_lar) / (z2_lar - z1_lar); // parametr of the equation of the line (LAr track)
+    double x_nd = t_nd * (x2_lar - x1_lar) + x1_lar;     // X-coordinate of extrapolated point of LAr track
+    double y_nd = t_nd * (y2_lar - y1_lar) + y1_lar;     // Y-coordinate of extrapolated point of LAr track
+
+    double dist_x = (x_mn - x_nd); // distance between X-coordinates of extrapolated points of minerva and LAr tracks
+    double dist_y = (y_mn - y_nd); // distance between Y-coordinates of extrapolated points of minerva and LAr tracks
+
+    residual = sqrt(pow(dist_x, 2) + pow(dist_y, 2));
+    costheta = ((x2_minerva - x1_minerva) * (x2_lar - x1_lar) +
+                (y2_minerva - y1_minerva) * (y2_lar - y1_lar) +
+                (z2_minerva - z1_minerva) * (z2_lar - z1_lar)) /
+               (track_LarLen * track_minerva.len_cm); // angle between minerva and Lar tracks
+
+    return (abs(delta_theta_x) < d_thetax && abs(delta_theta_y) < d_thetay && abs(dist_x) < d_y && abs(dist_y) < d_x);
+  }
+
 int caf_plotter(std::string input_file_list, std::string output_rootfile,
                 bool mcOnly) {
   int muons=0; int pions=0;
@@ -640,9 +704,27 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
               double dotProductUS = -999;
               double deltaExtrapX = -999;
               double deltaExtrapXUS = -999;
-              for (long unsigned int i = 0; i < sr->nd.minerva.ixn.size(); i++) {
-
-                for (long unsigned int j = 0; j < sr->nd.minerva.ixn[i].ntracks; j++) {
+              double dotProductFromCAF=-999;
+        	 	for(int i=0; i<sr->nd.trkmatch.extrap.size(); i++){
+                if (sr->nd.trkmatch.extrap[i].larid.ixn==nixn && sr->nd.trkmatch.extrap[i].larid.reco==1){
+                    int index=sr->nd.trkmatch.extrap[i].larid.idx;
+                    if (sr->nd.lar.dlp[nixn].tracks[index].start.z==sr->common.ixn.dlp[nixn].part.dlp[npart].start.z && sr->nd.lar.dlp[nixn].tracks[index].end.z==sr->common.ixn.dlp[nixn].part.dlp[npart].end.z){
+                    double angldispl=abs(sr->nd.trkmatch.extrap[i].angdispl);
+                    if (dotProductFromCAF<angldispl) dotProductFromCAF=angldispl;
+                }}
+                }
+                            if (dotProductFromCAF<0) continue;
+    
+        
+                    for(int i=0; i<sr->nd.minerva.ixn.size(); i++){
+                
+                    for (int j=0; j<sr->nd.minerva.ixn[i].ntracks; j++){
+                    double dotProductTemp=0;
+                    double trackDispl=0;
+                    bool pass=Passes_cut(sr->nd.minerva.ixn[i].tracks[j], start_pos.x,end_pos.x,start_pos.y,end_pos.y,start_pos.z, end_pos.z, dotProductTemp, trackDispl);
+                    if (!pass) continue;
+                    dotProductTemp=abs(dotProductTemp);
+                    if (abs(dotProductTemp-dotProductFromCAF)>0.0001) continue;
                   double dir_z = sr->nd.minerva.ixn[i].tracks[j].dir.z;
                   double end_z = sr->nd.minerva.ixn[i].tracks[j].end.z;
                   double start_z = sr->nd.minerva.ixn[i].tracks[j].start.z;
@@ -679,15 +761,9 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
                     double diffExtrap =
                         TMath::Sqrt(TMath::Power(extrapY - start_y, 2));
 
-                    if (dotProductDS < dotProduct &&
-                        abs(extrapY - mnvOffsetY) < 15 &&
-                        abs(TMath::ATan(dirXMinerva / dirZMinerva) -
-                            TMath::ATan(dirX / dirZ)) < 0.06 &&
-                        abs(TMath::ATan(dirYMinerva / dirZMinerva) -
-                            TMath::ATan(dirY / dirZ)) < 0.06 &&
-                        abs(extrapX - mnvOffsetX) < 15 && end_z>endZMuonCand) {
+                    if (dotProductDS < dotProductTemp && end_z>endZMuonCand) {
                         endZMuonCand=end_z;
-                      dotProductDS = dotProduct;
+                      dotProductDS = dotProductTemp;
                       deltaExtrapY = extrapY;
                       deltaExtrapX = extrapX;
             
@@ -734,14 +810,8 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
 
                     // double
                     // diffExtrap=TMath::Sqrt(TMath::Power(extrapY-end_y,2));
-                    if (dotProductUS < dotProduct &&
-                        abs(extrapYUS - mnvOffsetY) < 15 &&
-                        abs(extrapXUS - mnvOffsetX) < 15 &&
-                        abs(TMath::ATan(dirXMinerva / dirZMinerva) -
-                            TMath::ATan(dirX / dirZ)) < 0.06 &&
-                        abs(TMath::ATan(dirYMinerva / dirZMinerva) -
-                            TMath::ATan(dirY / dirZ)) < 0.06)
-                      dotProductUS = dotProduct;
+                    if (dotProductUS < dotProductTemp)
+                      dotProductUS = dotProductTemp;
                     deltaExtrapYUS = extrapYUS;
                     deltaExtrapXUS = extrapXUS;
                     if (mcOnly) {
