@@ -9,8 +9,9 @@
 #include <string>
 #include "duneanaobj/StandardRecord/StandardRecord.h" //Ideally, this should be SRProxy.h, but there is an include error for that now. Alternatively, you can use SetBranchStatus function in TreeLoader, but it does not work for the common branch (to do)
 
-       double mnvOffsetXBack=-11; double mnvOffsetYBack=5.2;
-             double mnvOffsetXFront=-4.2; double mnvOffsetYFront=4.2;
+
+       double mnvOffsetXBack=-8.5; double mnvOffsetYBack=3.15; double mnvOffsetZFront=0;
+             double mnvOffsetXFront=-6.55; double mnvOffsetYFront=4.615; double mnvOffsetZBack=20;
   bool Passes_cut(caf::SRTrack track_minerva, double x1_lar, double x2_lar, double y1_lar, double y2_lar, double z1_lar, double z2_lar, double &costheta, double &residual)
   {
 
@@ -19,24 +20,49 @@
     double d_y = 19;
     double d_thetax =0.08;
     double d_thetay=0.09;
-    
+
     double z1_minerva = track_minerva.start.z;
     double z2_minerva = track_minerva.end.z;
     double offsetYStart=mnvOffsetYFront; double offsetXStart=mnvOffsetXFront;
     double offsetYEnd=mnvOffsetYBack; double offsetXEnd=mnvOffsetXBack;
+    double offsetZStart=mnvOffsetZFront; double offsetZEnd=mnvOffsetZBack;
     if (z1_minerva>0){
-        offsetYStart=mnvOffsetYBack; offsetXStart=mnvOffsetXBack;
+        offsetYStart=mnvOffsetYBack; offsetXStart=mnvOffsetXBack; offsetZStart=mnvOffsetZBack;
+        
     }
     if (z2_minerva<0){
-        offsetYEnd=mnvOffsetYFront; offsetYEnd=mnvOffsetYFront;
+        offsetYEnd=mnvOffsetYFront; offsetYEnd=mnvOffsetYFront; offsetZEnd=mnvOffsetZFront;
     }
 
-
+    z1_minerva=z1_minerva+offsetZStart;
+    z2_minerva=z2_minerva+offsetZEnd;
     double x2_minerva=track_minerva.end.x+offsetXEnd;
     double x1_minerva=track_minerva.start.x+offsetXStart;
 
     double y2_minerva=track_minerva.end.y+offsetYEnd;
     double y1_minerva=track_minerva.start.y+offsetYStart;
+
+
+        if (mnvOffsetXFront!=0){
+        double inter_x1=x1_minerva;
+        double inter_x2=x2_minerva;
+        double inter_z1=z1_minerva;
+        double inter_z2=z2_minerva;
+        double inter_y1=y1_minerva;
+        double inter_y2=y2_minerva;
+        
+        
+        x1_minerva =x1_minerva- inter_z1 * 0.011;
+        x2_minerva=x2_minerva-inter_z2 * 0.011;
+        z1_minerva =z1_minerva- inter_x1 * 0.011;
+        z2_minerva=z2_minerva-inter_x2 * 0.011;
+        
+        y1_minerva += inter_z1 * 0.002;
+        y2_minerva += inter_z2 * 0.002;
+        
+        z1_minerva -= inter_y1 * 0.002;
+        z2_minerva  -= inter_y2 * 0.002;
+        }
 
     double dX=x2_lar-x1_lar;
     double dY=y2_lar-y1_lar;
@@ -182,7 +208,7 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile, bool m
      sumPOT=sr->beam.pulsepot/1e13+sumPOT;
 
 
-       if (mcOnly){ mnvOffsetXBack=0; mnvOffsetYBack=0; mnvOffsetXFront=0; mnvOffsetYFront=0;}
+       if (mcOnly){ mnvOffsetXBack=0; mnvOffsetYBack=0; mnvOffsetXFront=0; mnvOffsetYFront=0; mnvOffsetZFront=0; mnvOffsetZBack=0;}
 
       	 for(int i=0; i<sr->nd.minerva.ixn.size(); i++){
 
@@ -338,7 +364,7 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile, bool m
 double deltaExtrapXUSFront=-999; double deltaExtrapYUSFront=-999;
         double dotProductFromCAF=-999;
         	 	for(int i=0; i<sr->nd.trkmatch.extrap.size(); i++){
-                if (sr->nd.trkmatch.extrap[i].larid.ixn==nixn && sr->nd.trkmatch.extrap[i].larid.reco==1){
+                if (sr->nd.trkmatch.extrap[i].larid.ixn==nixn && sr->nd.trkmatch.extrap[i].larid.reco==2){
                     int index=sr->nd.trkmatch.extrap[i].larid.idx;
                     if (sr->nd.lar.pandora[nixn].tracks[index].start.z==sr->common.ixn.pandora[nixn].part.pandora[npart].start.z && sr->nd.lar.pandora[nixn].tracks[index].end.z==sr->common.ixn.pandora[nixn].part.pandora[npart].end.z){
                     double angldispl=abs(sr->nd.trkmatch.extrap[i].angdispl);
@@ -357,28 +383,57 @@ double deltaExtrapXUSFront=-999; double deltaExtrapYUSFront=-999;
         if (!pass) continue;
         dotProductTemp=abs(dotProductTemp);
         if (mcOnly && abs(dotProductTemp-dotProductFromCAF)>0.0001) continue;
-		double end_z=sr->nd.minerva.ixn[i].tracks[j].end.z;
-		double start_z=sr->nd.minerva.ixn[i].tracks[j].start.z;
+        double z1_minerva = sr->nd.minerva.ixn[i].tracks[j].start.z;
+        double z2_minerva = sr->nd.minerva.ixn[i].tracks[j].end.z;
+        
         double offsetYStart=mnvOffsetYFront; double offsetXStart=mnvOffsetXFront;
         double offsetYEnd=mnvOffsetYBack; double offsetXEnd=mnvOffsetXBack;
-        if (start_z>0){
-            offsetYStart=mnvOffsetYBack; offsetXStart=mnvOffsetXBack;
+        double offsetZStart=mnvOffsetZFront; double offsetZEnd=mnvOffsetZBack;
+        if (z1_minerva>0){
+            offsetYStart=mnvOffsetYBack; offsetXStart=mnvOffsetXBack; offsetZStart=mnvOffsetZBack;
+            
         }
-        if (end_z<0){
-            offsetYEnd=mnvOffsetYFront; offsetYEnd=mnvOffsetYFront;
+        if (z2_minerva<0){
+            offsetYEnd=mnvOffsetYFront; offsetYEnd=mnvOffsetYFront; offsetZEnd=mnvOffsetZFront;
+        }
+        
+        z1_minerva=z1_minerva+offsetZStart;
+        z2_minerva=z2_minerva+offsetZEnd;
+        double x2_minerva=sr->nd.minerva.ixn[i].tracks[j].end.x+offsetXEnd;
+        double x1_minerva=sr->nd.minerva.ixn[i].tracks[j].start.x+offsetXStart;
+        
+        double y2_minerva=sr->nd.minerva.ixn[i].tracks[j].end.y+offsetYEnd;
+        double y1_minerva=sr->nd.minerva.ixn[i].tracks[j].start.y+offsetYStart;
+        
+        
+        if (!mcOnly){
+        double inter_x1=x1_minerva;
+        double inter_x2=x2_minerva;
+        double inter_z1=z1_minerva;
+        double inter_z2=z2_minerva;
+        double inter_y1=y1_minerva;
+        double inter_y2=y2_minerva;
+        
+        
+        x1_minerva =x1_minerva- inter_z1 * 0.011;
+        x2_minerva=x2_minerva-inter_z2 * 0.011;
+        z1_minerva =z1_minerva- inter_x1 * 0.011;
+        z2_minerva=z2_minerva-inter_x2 * 0.011;
+        
+        y1_minerva += inter_z1 * 0.002;
+        y2_minerva += inter_z2 * 0.002;
+        
+        z1_minerva -= inter_y1 * 0.002;
+        z2_minerva  -= inter_y2 * 0.002;
         }
 
-
-		double end_x=sr->nd.minerva.ixn[i].tracks[j].end.x+offsetXEnd;
-		double start_x=sr->nd.minerva.ixn[i].tracks[j].start.x+offsetXStart;
-
-		double end_y=sr->nd.minerva.ixn[i].tracks[j].end.y+offsetYEnd;
-		double start_y=sr->nd.minerva.ixn[i].tracks[j].start.y+offsetYStart;
+        double start_x=x1_minerva; double end_x=x2_minerva; double start_y=y1_minerva; double end_y=y2_minerva;
+        double start_z=z1_minerva; double end_z=z2_minerva;
 
 
-        double dXMnv=(end_x-start_x);
-		double dYMnv=(end_y-start_y);
-		double dZMnv=(end_z-start_z);
+        double dXMnv=(x2_minerva-x1_minerva);
+		double dYMnv=(y2_minerva-y1_minerva);
+		double dZMnv=(z2_minerva-z1_minerva);
 		double lengthMinerva=TMath::Sqrt(dXMnv*dXMnv+dYMnv*dYMnv+dZMnv*dZMnv);
 
         double dir_x=dXMnv/lengthMinerva;
