@@ -108,8 +108,6 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
   // Define histograms
   TH1D *part_energy_hist =
       new TH1D("recpart_energy", "Reco particle energy in GeV", 100, 0, 1);
-  TH1D *trueEnu =
-      new TH1D("trueEnu", "trueEnu", 100, 0, 20);
 
   int binsMult = 7;
   Double_t edgesMult[8] = {1, 2, 3, 4, 5, 6, 8, 10};
@@ -176,7 +174,7 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
   TH1D *recoBacktrackElAr =
       new TH1D("recoBacktrackElAr", "recoBacktrackElAr", 40, 0, 20);
 
-  Double_t edges[7] = {0.91, 0.96, 0.98, 0.9887, 0.994, 0.9974, 1};
+  Double_t edges[6] = {0.975, 0.98, 0.9887, 0.994, 0.9974, 1};
   TH1D *trueBacktrackedCosL_zoomOut = new TH1D(
       "trueBacktrackedCosL_zoomOut", "trueBacktrackedCosL_zoomOut", 50, 0.8, 1);
   TH1D *trueCosL_zoomOut = new TH1D(
@@ -186,7 +184,7 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
       TH1D *trueCosLNumu_zoomOut = new TH1D(
       "trueCosLNumu_zoomOut", "trueCosLNumu_zoomOut", 50, 0.8, 1);
   TH1D *trueBacktrackedCosL =
-      new TH1D("trueBacktrackedCosL", "trueBacktrackedCosL", 6, edges);
+      new TH1D("trueBacktrackedCosL", "trueBacktrackedCosL", 5, edges);
   TH1D *minervaMatchPDG = new TH1D("minervaMatchPDG", "minervaMatchPDG", 6000, -3000, 3000);
   TH1D *minervaMatchE = new TH1D("minervaMatchE", "minervaMatchE", 50, 0, 20);
   TH1D *minervaMatchCos = new TH1D("minervaMatchCos", "minervaMatchCos", 100, -1, 1);
@@ -287,8 +285,8 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
   TH2D *recoVertex2DBadYZ = new TH2D("recoVertex2DBadYZ", "recoVertex2DBadYZ",
                                      70, -70, 70, 70, -70, 70);
 
-  TH1D *recoCosL = new TH1D("recoCosL", "recoCosL", 6, edges);
-  TH1D *badRecoCosL = new TH1D("badRecoCosL", "badRecoCosL", 6, edges);
+  TH1D *recoCosL = new TH1D("recoCosL", "recoCosL", 5, edges);
+  TH1D *badRecoCosL = new TH1D("badRecoCosL", "badRecoCosL", 5, edges);
   TH1D *trueBacktrackedCosL_unbinned =
       new TH1D("trueBacktrackedCosL_unbinned", "trueBacktrackedCosL_unbinned",
                50, 0.8, 1);
@@ -299,9 +297,9 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
                20, 0.0, 20);
   TH1D *trueMult_unbinned =
       new TH1D("trueMult_unbinned", "trueMult_unbinned", 20, 0, 20);
-  TH1D *trueCosL = new TH1D("trueCosL", "trueCosL", 6, edges);
+  TH1D *trueCosL = new TH1D("trueCosL", "trueCosL", 5, edges);
   TH2D *responseCosL =
-      new TH2D("responseCosL", "responseCosL", 6, edges, 6, edges);
+      new TH2D("responseCosL", "responseCosL", 5, edges, 5, edges);
 
   TH2D *recoVertex2DBad =
       new TH2D("recoVertex2DBad", "recoVertex2DBad", 70, -70, 70, 70, -70, 70);
@@ -512,9 +510,8 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
               trueCosL_unbinned->Fill(cosL); trueCosL_zoomOut->Fill(cosL);
                 if ((sr->mc.nu[ntrue].pdg) == 14){ trueCosLNumu_zoomOut->Fill(cosL);}
                 else{ trueCosLNumubar_zoomOut->Fill(cosL);}
-              if (cosL > 0.91 && Elep>1) {
+              if (cosL > 0.9) {
                 trueCosL->Fill(cosL);
-                trueEnu->Fill(sr->mc.nu[ntrue].E);
               }
               // std::cout<<n<<","<<ntrue<<","<<primaries<<","<<dX<<","<<dY<<","<<dZ<<","<<p.pz/lengthP<<std::endl;
 
@@ -536,7 +533,7 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
           truePart++;
         }
         // Save hadron information if it is above the cosL signal definition
-        if (cosL < 0.9 || Elep<1)
+        if (cosL < 0.98)
           continue;
         escapePi->Fill(escapingPions);
         nPi->Fill(nPion);
@@ -554,7 +551,7 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
     std::vector<int> trueInteractionIndex;
     std::vector<int> primaryTrkIndex;
     trueIntPerSpill->Fill(intAboveThresh);
-    for (long unsigned nixn = 0; nixn < sr->common.ixn.pandora.size(); nixn++) {
+    for (long unsigned nixn = 0; nixn < sr->common.ixn.dlp.size(); nixn++) {
       double cosL = -999;
       double endZTemp=-999;
       bool oneContained = false;
@@ -574,21 +571,21 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
       double dirYExiting = -9999;
       std::vector<int> mx2IntCandidateVector, mx2IdxCandidateVector, ndlarTrkCandidateVector;
 
-      double recoVertexX = sr->common.ixn.pandora[nixn].vtx.x;
-      double recoVertexY = sr->common.ixn.pandora[nixn].vtx.y;
-      double recoVertexZ = sr->common.ixn.pandora[nixn].vtx.z;
+      double recoVertexX = sr->common.ixn.dlp[nixn].vtx.x;
+      double recoVertexY = sr->common.ixn.dlp[nixn].vtx.y;
+      double recoVertexZ = sr->common.ixn.dlp[nixn].vtx.z;
 
-      recoVertex2DNoCuts->Fill(sr->common.ixn.pandora[nixn].vtx.x,
-                               sr->common.ixn.pandora[nixn].vtx.z);
+      recoVertex2DNoCuts->Fill(sr->common.ixn.dlp[nixn].vtx.x,
+                               sr->common.ixn.dlp[nixn].vtx.z);
 
       if (mcOnly) {
 
-        for (long unsigned int ntruth = 0; ntruth < sr->common.ixn.pandora[nixn].truth.size();
+        for (long unsigned int ntruth = 0; ntruth < sr->common.ixn.dlp[nixn].truth.size();
              ntruth++) {
 
-          if (biggestMatch < sr->common.ixn.pandora[nixn].truthOverlap.at(ntruth)) {
-            biggestMatch = sr->common.ixn.pandora[nixn].truthOverlap.at(ntruth);
-            biggestMatchIndex = sr->common.ixn.pandora[nixn].truth.at(ntruth);
+          if (biggestMatch < sr->common.ixn.dlp[nixn].truthOverlap.at(ntruth)) {
+            biggestMatch = sr->common.ixn.dlp[nixn].truthOverlap.at(ntruth);
+            biggestMatchIndex = sr->common.ixn.dlp[nixn].truth.at(ntruth);
           }
         }
         if (sr->mc.nu[biggestMatchIndex].id > 1E9) {
@@ -605,45 +602,23 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
             abs(sr->mc.nu[biggestMatchIndex].iscc) == true &&
             sr->mc.nu[biggestMatchIndex].targetPDG == 1000180400 &&
             diffVtx < 5 && abs(trueVtxX) < 59 && abs(trueVtxZ) > 5 &&
-            abs(trueVtxZ) < 59.5 && abs(trueVtxY) < 57){
-            for (int primaries = 0;
-                 primaries < sr->mc.nu[biggestMatchIndex].prim.size();
-                 primaries++) {
-            if (abs(sr->mc.nu[biggestMatchIndex].prim[primaries].pdg) != 13)
-                continue;
-              double Elep = sr->mc.nu[biggestMatchIndex].prim[primaries].p.E;
-              auto start_pos =
-                  sr->mc.nu[biggestMatchIndex].prim[primaries].start_pos;
-              auto end_pos =
-                  sr->mc.nu[biggestMatchIndex].prim[primaries].end_pos;
-              auto p = sr->mc.nu[biggestMatchIndex].prim[primaries].p;
-              // if (std::isnan(start_pos.z)) continue;
-              double dX = (p.px);
-              double dY = (p.py);
-              double dZ = (p.pz);
-              double length =
-                  TMath::Sqrt(p.px * p.px + p.py * p.py + p.pz * p.pz);
-              double dir_x = dX / length;
-              double dir_y = dY / length;
-              double dir_z = dZ / length;
-              double cosLPrelim = dir_x * beam_x + dir_y * beam_y + dir_z * beam_z;
+            abs(trueVtxZ) < 59.5 && abs(trueVtxY) < 57)
+          goodInteraction = true;
 
-             if (cosLPrelim<0.91 || Elep<1) goodInteraction = false; else goodInteraction=true;}
-        }
-        recoHistVertexY->Fill(sr->common.ixn.pandora[nixn].vtx.y);
-        recoHistVertexX->Fill(sr->common.ixn.pandora[nixn].vtx.x);
-        recoHistVertexZ->Fill(sr->common.ixn.pandora[nixn].vtx.z);
+        recoHistVertexY->Fill(sr->common.ixn.dlp[nixn].vtx.y);
+        recoHistVertexX->Fill(sr->common.ixn.dlp[nixn].vtx.x);
+        recoHistVertexZ->Fill(sr->common.ixn.dlp[nixn].vtx.z);
         if (goodInteraction == true)
           goodIntNum++;
         else
           badIntNum++;
 
-        if (/*abs(abs(sr->common.ixn.pandora[nixn].vtx.x)-33)<1 || */ abs(
-              sr->common.ixn.pandora[nixn].vtx.x) > 59 ||
-          abs(sr->common.ixn.pandora[nixn].vtx.x) < 5 ||
-          abs(sr->common.ixn.pandora[nixn].vtx.y) > 57 ||
-          abs(sr->common.ixn.pandora[nixn].vtx.z) < 5 ||
-          abs(sr->common.ixn.pandora[nixn].vtx.z) > 59.5)
+        if (/*abs(abs(sr->common.ixn.dlp[nixn].vtx.x)-33)<1 || */ abs(
+              sr->common.ixn.dlp[nixn].vtx.x) > 59 ||
+          abs(sr->common.ixn.dlp[nixn].vtx.x) < 5 ||
+          abs(sr->common.ixn.dlp[nixn].vtx.y) > 57 ||
+          abs(sr->common.ixn.dlp[nixn].vtx.z) < 5 ||
+          abs(sr->common.ixn.dlp[nixn].vtx.z) > 59.5)
         continue;
 
         trueInteractionIndex.push_back(biggestMatchIndex);
@@ -669,26 +644,27 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
       int mx2IntCandidate=-9;
       int mx2IdxCandidate=-9;
       for (long unsigned npart = 0;
-           npart < sr->common.ixn.pandora[nixn].part.pandora.size();
+           npart < sr->common.ixn.dlp[nixn].part.dlp.size();
            npart++) { // loop over particles
-      //  if (!sr->common.ixn.pandora[nixn].part.pandora[npart].primary)
+      //  if (!sr->common.ixn.dlp[nixn].part.dlp[npart].primary)
       //    continue;
-        int pdg = sr->common.ixn.pandora[nixn].part.pandora[npart].pdg;
+        int pdg = sr->common.ixn.dlp[nixn].part.dlp[npart].pdg;
         // Loop over primary tracks
-        if ((abs(pdg) !=-2)) {
+        if ((abs(pdg) == 2212 || abs(pdg) == 13 || abs(pdg) == 211 ||
+             abs(pdg) == 321)) {
 
-          auto start_pos = sr->common.ixn.pandora[nixn].part.pandora[npart].start;
-          auto end_pos = sr->common.ixn.pandora[nixn].part.pandora[npart].end;
+          auto start_pos = sr->common.ixn.dlp[nixn].part.dlp[npart].start;
+          auto end_pos = sr->common.ixn.dlp[nixn].part.dlp[npart].end;
           double diffVertexdZ =
-              abs(start_pos.z - sr->common.ixn.pandora[nixn].vtx.z);
+              abs(start_pos.z - sr->common.ixn.dlp[nixn].vtx.z);
           double diffVertexdX =
-              abs(start_pos.x - sr->common.ixn.pandora[nixn].vtx.x);
+              abs(start_pos.x - sr->common.ixn.dlp[nixn].vtx.x);
           double diffVertexdY =
-              abs(start_pos.y - sr->common.ixn.pandora[nixn].vtx.y);
+              abs(start_pos.y - sr->common.ixn.dlp[nixn].vtx.y);
           double diffVertex = TMath::Sqrt(diffVertexdZ * diffVertexdZ +
                                           diffVertexdY * diffVertexdY +
                                           diffVertexdX * diffVertexdX);
-          if (diffVertex > 5)
+          if (diffVertex > 50)
             continue;
           // Make sure it is near the vertex
           double dX = (end_pos.x - start_pos.x);
@@ -712,7 +688,7 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
           if (length > longestTrk)
             longestTrk = length;
           // Make sure it is above the track threshold
-          if (/*sr->common.ixn.pandora[nixn].part.pandora[npart].primary == true &&*/
+          if (sr->common.ixn.dlp[nixn].part.dlp[npart].primary == true &&
               length > minTrkLength) {
             partMult++;
             trackMult++;
@@ -734,9 +710,9 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
               double deltaExtrapXUS = -999;
               double dotProductFromCAF=-999;
         	 	for(int i=0; i<sr->nd.trkmatch.extrap.size(); i++){
-                if (sr->nd.trkmatch.extrap[i].larid.ixn==nixn && sr->nd.trkmatch.extrap[i].larid.reco==2){
+                if (sr->nd.trkmatch.extrap[i].larid.ixn==nixn && sr->nd.trkmatch.extrap[i].larid.reco==1){
                     int index=sr->nd.trkmatch.extrap[i].larid.idx;
-                    if (sr->nd.lar.pandora[nixn].tracks[index].start.z==sr->common.ixn.pandora[nixn].part.pandora[npart].start.z && sr->nd.lar.pandora[nixn].tracks[index].end.z==sr->common.ixn.pandora[nixn].part.pandora[npart].end.z){
+                    if (sr->nd.lar.dlp[nixn].tracks[index].start.z==sr->common.ixn.dlp[nixn].part.dlp[npart].start.z && sr->nd.lar.dlp[nixn].tracks[index].end.z==sr->common.ixn.dlp[nixn].part.dlp[npart].end.z){
                     double angldispl=abs(sr->nd.trkmatch.extrap[i].angdispl);
                     if (dotProductFromCAF<angldispl) dotProductFromCAF=angldispl;
                 }}
@@ -752,7 +728,7 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
                     bool pass=Passes_cut(sr->nd.minerva.ixn[i].tracks[j], start_pos.x,end_pos.x,start_pos.y,end_pos.y,start_pos.z, end_pos.z, dotProductTemp, trackDispl);
                     if (!pass) continue;
                     dotProductTemp=abs(dotProductTemp);
-                    if (abs(dotProductTemp-dotProductFromCAF)>0.001) continue;
+                    if (abs(dotProductTemp-dotProductFromCAF)>0.0001) continue;
                   double dir_z = sr->nd.minerva.ixn[i].tracks[j].dir.z;
                   double end_z = sr->nd.minerva.ixn[i].tracks[j].end.z;
                   double start_z = sr->nd.minerva.ixn[i].tracks[j].start.z;
@@ -762,7 +738,7 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
                   double end_y = sr->nd.minerva.ixn[i].tracks[j].end.y;
                   double start_y = sr->nd.minerva.ixn[i].tracks[j].start.y;
                   // Try to match a track starting in 2x2 to MINERvA
-                  if (start_z > 0 && start_z < 170 && end_z > 170 &&
+                  if (start_z > 0 && start_z < 170 && end_z > 270 &&
                       ((end_pos.z) > 62)) {
                     int truthPart =
                         sr->nd.minerva.ixn[i].tracks[j].truth[0].part;
@@ -893,8 +869,8 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
             }
      // Calculate muon direction based on distance
       int npart=ndlarTrkCandidateVector.at(muonIndex);
-      auto start_pos = sr->common.ixn.pandora[nixn].part.pandora[npart].start;
-      auto end_pos = sr->common.ixn.pandora[nixn].part.pandora[npart].end;
+      auto start_pos = sr->common.ixn.dlp[nixn].part.dlp[npart].start;
+      auto end_pos = sr->common.ixn.dlp[nixn].part.dlp[npart].end;
       if (mcOnly==1){
                       int i=mx2IntCandidateVector.at(muonIndex); int j=mx2IdxCandidateVector.at(muonIndex); 
                       int  ixnMinerva=sr->nd.minerva.ixn[i].tracks[j].truth[0].ixn;
@@ -1016,16 +992,16 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
         }
 
         for (long unsigned npart = 0;
-             npart < sr->common.ixn.pandora[nixn].part.pandora.size();
+             npart < sr->common.ixn.dlp[nixn].part.dlp.size();
              npart++) { // loop over particles
           // std::cout<<"Containment variable:
-          // "<<sr->common.ixn.pandora[nixn].part.pandora[npart].contained<<std::endl;
-          if (!sr->common.ixn.pandora[nixn].part.pandora[npart].primary)
+          // "<<sr->common.ixn.dlp[nixn].part.dlp[npart].contained<<std::endl;
+          if (!sr->common.ixn.dlp[nixn].part.dlp[npart].primary)
             continue;
-          int pdg = sr->common.ixn.pandora[nixn].part.pandora[npart].pdg;
+          int pdg = sr->common.ixn.dlp[nixn].part.dlp[npart].pdg;
 
-          auto start_pos = sr->common.ixn.pandora[nixn].part.pandora[npart].start;
-          auto end_pos = sr->common.ixn.pandora[nixn].part.pandora[npart].end;
+          auto start_pos = sr->common.ixn.dlp[nixn].part.dlp[npart].start;
+          auto end_pos = sr->common.ixn.dlp[nixn].part.dlp[npart].end;
           double dX = (end_pos.x - start_pos.x);
           double dY = (end_pos.y - start_pos.y);
           double dZ = (end_pos.z - start_pos.z);
@@ -1036,23 +1012,23 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
           auto lengthDist = length;
           if (abs(pdg) == 22 || abs(pdg) == 11 || abs(pdg) == 111) {
             auto truthSize =
-                sr->common.ixn.pandora[nixn].part.pandora[npart].truth.size();
+                sr->common.ixn.dlp[nixn].part.dlp[npart].truth.size();
             double maxPartTruthOverlap = 0;
 
             for (int backTrack = 0; backTrack < truthSize; backTrack++) {
-              int parType = sr->common.ixn.pandora[nixn]
-                                .part.pandora[npart]
+              int parType = sr->common.ixn.dlp[nixn]
+                                .part.dlp[npart]
                                 .truth[backTrack]
                                 .type;
-              int partNumber = sr->common.ixn.pandora[nixn]
-                                   .part.pandora[npart]
+              int partNumber = sr->common.ixn.dlp[nixn]
+                                   .part.dlp[npart]
                                    .truth[backTrack]
                                    .part;
               int interactionNumber =
-                  sr->common.ixn.pandora[nixn].part.pandora[npart].truth[backTrack].ixn;
+                  sr->common.ixn.dlp[nixn].part.dlp[npart].truth[backTrack].ixn;
 
-              double partTruthOverlap = sr->common.ixn.pandora[nixn]
-                                            .part.pandora[npart]
+              double partTruthOverlap = sr->common.ixn.dlp[nixn]
+                                            .part.dlp[npart]
                                             .truthOverlap[backTrack];
               if (maxPartTruthOverlap < partTruthOverlap) {
                 maxPartTruthOverlap = partTruthOverlap;
@@ -1060,18 +1036,18 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
             }
 
             for (int backTrack = 0; backTrack < truthSize; backTrack++) {
-              int parType = sr->common.ixn.pandora[nixn]
-                                .part.pandora[npart]
+              int parType = sr->common.ixn.dlp[nixn]
+                                .part.dlp[npart]
                                 .truth[backTrack]
                                 .type;
-              int partNumber = sr->common.ixn.pandora[nixn]
-                                   .part.pandora[npart]
+              int partNumber = sr->common.ixn.dlp[nixn]
+                                   .part.dlp[npart]
                                    .truth[backTrack]
                                    .part;
               int interactionNumber =
-                  sr->common.ixn.pandora[nixn].part.pandora[npart].truth[backTrack].ixn;
-              double partTruthOverlap = sr->common.ixn.pandora[nixn]
-                                            .part.pandora[npart]
+                  sr->common.ixn.dlp[nixn].part.dlp[npart].truth[backTrack].ixn;
+              double partTruthOverlap = sr->common.ixn.dlp[nixn]
+                                            .part.dlp[npart]
                                             .truthOverlap[backTrack];
 
               int backtracked = -9999;
@@ -1094,7 +1070,7 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
               } else
                 backtracked = -1;
             }
-            if (sr->common.ixn.pandora[nixn].part.pandora[npart].primary == true)
+            if (sr->common.ixn.dlp[nixn].part.dlp[npart].primary == true)
               showerCorrectness->Fill(correctShower);
           }
           int maxPartNumber = -999;
@@ -1102,32 +1078,32 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
           if ((abs(pdg) == 2212 || abs(pdg) == 13 || abs(pdg) == 211 ||
                abs(pdg) == 321)) {
             auto truthSize =
-                sr->common.ixn.pandora[nixn].part.pandora[npart].truth.size();
+                sr->common.ixn.dlp[nixn].part.dlp[npart].truth.size();
             double maxPartTruthOverlap = 0;
             double diffVertexdZ =
-                abs(start_pos.z - sr->common.ixn.pandora[nixn].vtx.z);
+                abs(start_pos.z - sr->common.ixn.dlp[nixn].vtx.z);
             double diffVertexdX =
-                abs(start_pos.x - sr->common.ixn.pandora[nixn].vtx.x);
+                abs(start_pos.x - sr->common.ixn.dlp[nixn].vtx.x);
             double diffVertexdY =
-                abs(start_pos.y - sr->common.ixn.pandora[nixn].vtx.y);
+                abs(start_pos.y - sr->common.ixn.dlp[nixn].vtx.y);
             double diffVertex = TMath::Sqrt(diffVertexdZ * diffVertexdZ +
                                             diffVertexdY * diffVertexdY +
                                             diffVertexdX * diffVertexdX);
             diffVertexHist->Fill(diffVertex);
 
             for (int backTrack = 0; backTrack < truthSize; backTrack++) {
-              int parType = sr->common.ixn.pandora[nixn]
-                                .part.pandora[npart]
+              int parType = sr->common.ixn.dlp[nixn]
+                                .part.dlp[npart]
                                 .truth[backTrack]
                                 .type;
-              int partNumber = sr->common.ixn.pandora[nixn]
-                                   .part.pandora[npart]
+              int partNumber = sr->common.ixn.dlp[nixn]
+                                   .part.dlp[npart]
                                    .truth[backTrack]
                                    .part;
               int interactionNumber =
-                  sr->common.ixn.pandora[nixn].part.pandora[npart].truth[backTrack].ixn;
-              double partTruthOverlap = sr->common.ixn.pandora[nixn]
-                                            .part.pandora[npart]
+                  sr->common.ixn.dlp[nixn].part.dlp[npart].truth[backTrack].ixn;
+              double partTruthOverlap = sr->common.ixn.dlp[nixn]
+                                            .part.dlp[npart]
                                             .truthOverlap[backTrack];
               // std::cout<<"Truth has overlap of:
               // "<<partTruthOverlap<<std::endl;
@@ -1137,18 +1113,18 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
             }
 
             for (int backTrack = 0; backTrack < truthSize; backTrack++) {
-              int parType = sr->common.ixn.pandora[nixn]
-                                .part.pandora[npart]
+              int parType = sr->common.ixn.dlp[nixn]
+                                .part.dlp[npart]
                                 .truth[backTrack]
                                 .type;
-              int partNumber = sr->common.ixn.pandora[nixn]
-                                   .part.pandora[npart]
+              int partNumber = sr->common.ixn.dlp[nixn]
+                                   .part.dlp[npart]
                                    .truth[backTrack]
                                    .part;
               int interactionNumber =
-                  sr->common.ixn.pandora[nixn].part.pandora[npart].truth[backTrack].ixn;
-              double partTruthOverlap = sr->common.ixn.pandora[nixn]
-                                            .part.pandora[npart]
+                  sr->common.ixn.dlp[nixn].part.dlp[npart].truth[backTrack].ixn;
+              double partTruthOverlap = sr->common.ixn.dlp[nixn]
+                                            .part.dlp[npart]
                                             .truthOverlap[backTrack];
               if (maxPartTruthOverlap > partTruthOverlap)
                 continue;
@@ -1201,7 +1177,7 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
                   double dZLen = (end_pos.z - start_pos.z);
                   double lengthPos = TMath::Sqrt(dXLen * dXLen + dYLen * dYLen +
                                                  dZLen * dZLen);
-                  if (sr->common.ixn.pandora[nixn].part.pandora[npart].contained ==
+                  if (sr->common.ixn.dlp[nixn].part.dlp[npart].contained ==
                           true &&
                       lengthPos > minTrkLength)
                     confusionMatrix->Fill(pdgNumber, backtrackedPDG);
@@ -1299,7 +1275,7 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
                   lengthTrk > minTrkLength)
                 trueMatchMult++;
               // if (goodInteraction)
-              // std::cout<<biggestMatch<<","<<sr->common.ixn.pandora[nixn].vtx.z<<","<<sr->mc.nu[biggestMatchIndex].vtx.z<<","<<start_pos.z<<","<<end_pos.z<<std::endl;
+              // std::cout<<biggestMatch<<","<<sr->common.ixn.dlp[nixn].vtx.z<<","<<sr->mc.nu[biggestMatchIndex].vtx.z<<","<<start_pos.z<<","<<end_pos.z<<std::endl;
               if (abs(sr->mc.nu[biggestMatchIndex].prim[primaries].pdg) != 13)
                 continue;
               recoBacktrackElAr->Fill(Elep);
@@ -1310,13 +1286,13 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
             if (goodInteraction) {
               trueBacktrackedCosL_zoomOut->Fill(trueCosL);
               trueBacktrackedCosL_unbinned->Fill(trueCosL);
-              if (trueCosL<0.91)       recoVertex2D->Fill(sr->common.ixn.pandora[nixn].vtx.x,
-                         sr->common.ixn.pandora[nixn].vtx.z);
-              if (trueCosL>0.91){trueBacktrackedCosL->Fill(trueCosL);
+              if (trueCosL<0.9)       recoVertex2D->Fill(sr->common.ixn.dlp[nixn].vtx.x,
+                         sr->common.ixn.dlp[nixn].vtx.z);
+              if (trueCosL>0.9){trueBacktrackedCosL->Fill(trueCosL);
               responseCosL->Fill(cosLReco, trueCosL);
             }}
             // Fill the response matrix for the track multiplicity
-            if (cosLReco > 0.9 && trueCosL > 0.9 &&
+            if (cosLReco > 0.98 && trueCosL > 0.98 &&
                 goodInteraction) { /*std::cout<<trackMult<<","<<trueMatchMult<<std::endl;*/
               responseMult->Fill(trackMult, trueMatchMult);
               backtrackTrueMult->Fill(trueMatchMult);
@@ -1325,7 +1301,7 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
           }
         }
         // Fill the stack histograms of the track multiplicity by truth info
-        if (cosLReco > 0.9 && (!goodInteraction || trueCosL < 0.9)) {
+        if (cosLReco > 0.98 && (!goodInteraction || trueCosL < 0.98)) {
           track_multBad->Fill(trackMult);
         }
         if (!goodInteraction && sr->mc.nu[biggestMatchIndex].id > 1E9) {
@@ -1337,10 +1313,10 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
           recoBacktrackPDGSec->Fill(sr->mc.nu[biggestMatchIndex].pdg);
         }
 
-        if (!goodInteraction || trueCosL < 0.91)
+        if (!goodInteraction || trueCosL < 0.9)
           badRecoCosL->Fill(cosLReco);
-        if (cosLReco > 0.9) {
-          if (goodInteraction && trueCosL > 0.9 &&
+        if (cosLReco > 0.98) {
+          if (goodInteraction && trueCosL > 0.98 &&
               sr->mc.nu[biggestMatchIndex].iscc) {
             track_multGood->Fill(trackMult);
             int cc = sr->mc.nu[biggestMatchIndex].iscc;
@@ -1367,16 +1343,16 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
               track_multSec->Fill(trackMult);
             }
             bad_origin->Fill(rock);
-            recoVertex2DBad->Fill(sr->common.ixn.pandora[nixn].vtx.x,
-                                  sr->common.ixn.pandora[nixn].vtx.z);
+            recoVertex2DBad->Fill(sr->common.ixn.dlp[nixn].vtx.x,
+                                  sr->common.ixn.dlp[nixn].vtx.z);
             trueVertex2DBad->Fill(trueVtxX, trueVtxZ);
-            recoVertex2DBadYZ->Fill(sr->common.ixn.pandora[nixn].vtx.y,
-                                    sr->common.ixn.pandora[nixn].vtx.z);
+            recoVertex2DBadYZ->Fill(sr->common.ixn.dlp[nixn].vtx.y,
+                                    sr->common.ixn.dlp[nixn].vtx.z);
           }
         }
       }
       // Fill the reco information for track multiplicity
-      if (cosLReco > 0.9) {
+      if (cosLReco > 0.98) {
         track_mult->Fill(trackMult);
         part_mult->Fill(partMult);
       }
@@ -1457,7 +1433,7 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
 
   truePionEWithRecoInt->Write();
   trueProtonEWithRecoInt->Write();
-  trueEnu->Write();
+
 
 
 

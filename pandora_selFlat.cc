@@ -45,13 +45,16 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
   double beam_x = 0;
   double beam_y = -0.05836 / TMath::Sqrt(0.05836 * 0.05836 + 1);
   double beam_z = 1.0 / TMath::Sqrt(0.05836 * 0.05836 + 1);
+
   // Define histograms
   TH1D *part_energy_hist =
       new TH1D("recpart_energy", "Reco particle energy in GeV", 100, 0, 1);
+  TH1D *trueEnu =
+      new TH1D("trueEnu", "trueEnu", 100, 0, 20);
 
   int binsMult = 7;
   Double_t edgesMult[8] = {1, 2, 3, 4, 5, 6, 8, 10};
-  TH1D *track_length = new TH1D("tra)ck_length", "track_length", 100, 0, 100);
+  TH1D *track_length = new TH1D("track_length", "track_length", 100, 0, 100);
   TH1D *part_multTrkOnly =
       new TH1D("part_multTrkOnly", "part_multTrkOnly", binsMult, edgesMult);
   TH1D *part_mult = new TH1D("part_mult", "part_mult", binsMult, edgesMult);
@@ -114,8 +117,9 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
   TH1D *recoBacktrackElAr =
       new TH1D("recoBacktrackElAr", "recoBacktrackElAr", 40, 0, 20);
 
-  Double_t edges[6] = {0.975, 0.98, 0.9887, 0.994, 0.9974, 1};
-  TH1D *trueBacktrackedCosL_zoomOut = new TH1D(
+  Double_t edges[7] = {0.91, 0.96, 0.98, 0.9887, 0.994, 0.9974, 1};
+
+    TH1D *trueBacktrackedCosL_zoomOut = new TH1D(
       "trueBacktrackedCosL_zoomOut", "trueBacktrackedCosL_zoomOut", 50, 0.8, 1);
   TH1D *trueCosL_zoomOut = new TH1D(
       "trueCosL_zoomOut", "trueCosL_zoomOut", 50, 0.8, 1);
@@ -124,7 +128,7 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
       TH1D *trueCosLNumu_zoomOut = new TH1D(
       "trueCosLNumu_zoomOut", "trueCosLNumu_zoomOut", 50, 0.8, 1);
   TH1D *trueBacktrackedCosL =
-      new TH1D("trueBacktrackedCosL", "trueBacktrackedCosL", 5, edges);
+      new TH1D("trueBacktrackedCosL", "trueBacktrackedCosL", 6, edges);
   TH1D *minervaMatchPDG = new TH1D("minervaMatchPDG", "minervaMatchPDG", 6000, -3000, 3000);
   TH1D *minervaMatchE = new TH1D("minervaMatchE", "minervaMatchE", 50, 0, 20);
   TH1D *minervaMatchCos = new TH1D("minervaMatchCos", "minervaMatchCos", 100, -1, 1);
@@ -203,8 +207,7 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
   TH1D *trueDiffPosvsPDirZ =
       new TH1D("trueDiffPosvsPDirZ", "trueDiffPosvsPDirZ", 20, -1, 1);
 
-  TH1D *true_multGENIE =
-      new TH1D("true_multGENIE", "true_multGENIE", binsMult, edgesMult);
+  TH1D *true_multGENIE =      new TH1D("true_multGENIE", "true_multGENIE", binsMult, edgesMult);
   TH2D *responseGenieToG4 = new TH2D("responseGenieToG4", "responseGenieToG4",
                                      binsMult, edges, binsMult, edgesMult);
   TH1D *matchTrue_mult =
@@ -213,7 +216,7 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
       "matchTrue_multTrkOnly", "matchTrue_multTrkOnly", binsMult, edgesMult);
   TH1D *matchTrue_multGENIE = new TH1D(
       "matchTrue_multGENIE", "matchTrue_multGENIE", binsMult, edgesMult);
-  TH1D *matchHistEl = new TH1D("matchHistEl", "matchHistEl", 50, 0, 20);
+  TH1D *matchHistEl = new TH1D("matchHistEl", "matchHistEl", 100, 0, 20);
   TH1D *matchHistCosl = new TH1D("matchHistCosl", "matchHistCosl", 20, -1, 1);
 
   TH1D *histEl = new TH1D("histEl", "histEl", 50, 0, 20);
@@ -225,21 +228,21 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
   TH2D *recoVertex2DBadYZ = new TH2D("recoVertex2DBadYZ", "recoVertex2DBadYZ",
                                      70, -70, 70, 70, -70, 70);
 
-  TH1D *recoCosL = new TH1D("recoCosL", "recoCosL", 5, edges);
-  TH1D *badRecoCosL = new TH1D("badRecoCosL", "badRecoCosL", 5, edges);
+  TH1D *recoCosL = new TH1D("recoCosL", "recoCosL", 6, edges);
+  TH1D *badRecoCosL = new TH1D("badRecoCosL", "badRecoCosL", 6, edges);
   TH1D *trueBacktrackedCosL_unbinned =
       new TH1D("trueBacktrackedCosL_unbinned", "trueBacktrackedCosL_unbinned",
-               50, 0.95, 1);
+               50, 0.8, 1);
   TH1D *trueCosL_unbinned =
-      new TH1D("trueCosL_unbinned", "trueCosL_unbinned", 50, 0.95, 1);
+      new TH1D("trueCosL_unbinned", "trueCosL_unbinned", 50, 0.8, 1);
   TH1D *trueBacktrackedMult_unbinned =
       new TH1D("trueBacktrackedMult_unbinned", "trueBacktrackedMult_unbinned",
                20, 0.0, 20);
   TH1D *trueMult_unbinned =
       new TH1D("trueMult_unbinned", "trueMult_unbinned", 20, 0, 20);
-  TH1D *trueCosL = new TH1D("trueCosL", "trueCosL", 5, edges);
+  TH1D *trueCosL = new TH1D("trueCosL", "trueCosL", 6, edges);
   TH2D *responseCosL =
-      new TH2D("responseCosL", "responseCosL", 5, edges, 5, edges);
+      new TH2D("responseCosL", "responseCosL", 6, edges, 6, edges);
 
   TH2D *recoVertex2DBad =
       new TH2D("recoVertex2DBad", "recoVertex2DBad", 70, -70, 70, 70, -70, 70);
@@ -251,6 +254,7 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
   TH1D *totalSpills = new TH1D("totalSpilles", "totalSpills", 1, 0, 1);
   TH1D *trueIntPerSpill = new TH1D("trueIntPerSpill", "trueIntPerSpill", 10,0,10);
   double sumPOT = 0;
+
 
   // Give an input list
   std::ifstream caf_list(input_file_list.c_str());
@@ -442,8 +446,9 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
               trueCosL_unbinned->Fill(cosL); trueCosL_zoomOut->Fill(cosL);
                 if ((sr->mc.nu[ntrue].pdg) == 14){ trueCosLNumu_zoomOut->Fill(cosL);}
                 else{ trueCosLNumubar_zoomOut->Fill(cosL);}
-              if (cosL > 0.9) {
+              if (cosL > 0.91 && Elep>1) {
                 trueCosL->Fill(cosL);
+                trueEnu->Fill(sr->mc.nu[ntrue].E);
               }
               // std::cout<<n<<","<<ntrue<<","<<primaries<<","<<dX<<","<<dY<<","<<dZ<<","<<p.pz/lengthP<<std::endl;
 
@@ -465,7 +470,7 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
           truePart++;
         }
         // Save hadron information if it is above the cosL signal definition
-        if (cosL < 0.98)
+        if (cosL < 0.9 || Elep<1)
           continue;
         escapePi->Fill(escapingPions);
         nPi->Fill(nPion);
@@ -485,6 +490,7 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
     trueIntPerSpill->Fill(intAboveThresh);
     for (long unsigned nixn = 0; nixn < sr->common.ixn.pandora.size(); nixn++) {
       double cosL = -999;
+      double endZTemp=-999;
       bool oneContained = false;
       bool oneNotContained = false;
       goodInteraction = false;
@@ -500,6 +506,7 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
       double startZMuonCand = -999;
       double dirXExiting = -9999;
       double dirYExiting = -9999;
+      std::vector<int> mx2IntCandidateVector, mx2IdxCandidateVector, ndlarTrkCandidateVector;
 
       double recoVertexX = sr->common.ixn.pandora[nixn].vtx.x;
       double recoVertexY = sr->common.ixn.pandora[nixn].vtx.y;
@@ -507,6 +514,13 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
 
       recoVertex2DNoCuts->Fill(sr->common.ixn.pandora[nixn].vtx.x,
                                sr->common.ixn.pandora[nixn].vtx.z);
+      if (/*abs(abs(sr->common.ixn.pandora[nixn].vtx.x)-33)<1 || */ abs(
+              sr->common.ixn.pandora[nixn].vtx.x) > 59 ||
+          abs(sr->common.ixn.pandora[nixn].vtx.x) < 5 ||
+          abs(sr->common.ixn.pandora[nixn].vtx.y) > 57 ||
+          abs(sr->common.ixn.pandora[nixn].vtx.z) < 5 ||
+          abs(sr->common.ixn.pandora[nixn].vtx.z) > 59.5)
+        continue;
 
       if (mcOnly) {
 
@@ -518,11 +532,10 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
             biggestMatchIndex = sr->common.ixn.pandora[nixn].truth.at(ntruth);
           }
         }
-        if (biggestMatchIndex>-1 && sr->mc.nu.size()>0 && sr->mc.nu.size()>biggestMatchIndex){
+        if (biggestMatchIndex>-1 && sr->mc.nu.size()>0){
         if (sr->mc.nu[biggestMatchIndex].id > 1E9) {
           rock = 1;
         }
-        
         trueVtxX = sr->mc.nu[biggestMatchIndex].vtx.x;
         trueVtxY = sr->mc.nu[biggestMatchIndex].vtx.y;
         trueVtxZ = sr->mc.nu[biggestMatchIndex].vtx.z;
@@ -534,9 +547,32 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
             abs(sr->mc.nu[biggestMatchIndex].iscc) == true &&
             sr->mc.nu[biggestMatchIndex].targetPDG == 1000180400 &&
             diffVtx < 5 && abs(trueVtxX) < 59 && abs(trueVtxZ) > 5 &&
-            abs(trueVtxZ) < 59.5 && abs(trueVtxY) < 57)
-          goodInteraction = true;
+            abs(trueVtxZ) < 59.5 && abs(trueVtxY) < 57){
 
+                        for (int primaries = 0;
+                 primaries < sr->mc.nu[biggestMatchIndex].prim.size();
+                 primaries++) {
+            if (abs(sr->mc.nu[biggestMatchIndex].prim[primaries].pdg) != 13)
+                continue;
+              double Elep = sr->mc.nu[biggestMatchIndex].prim[primaries].p.E;
+              const auto& start_pos =
+                  sr->mc.nu[biggestMatchIndex].prim[primaries].start_pos;
+              const auto& end_pos =
+                  sr->mc.nu[biggestMatchIndex].prim[primaries].end_pos;
+              const auto& p = sr->mc.nu[biggestMatchIndex].prim[primaries].p;
+              // if (std::isnan(start_pos.z)) continue;
+              double dX = (p.px);
+              double dY = (p.py);
+              double dZ = (p.pz);
+              double length =
+                  TMath::Sqrt(p.px * p.px + p.py * p.py + p.pz * p.pz);
+              double dir_x = dX / length;
+              double dir_y = dY / length;
+              double dir_z = dZ / length;
+              double cosLPrelim = dir_x * beam_x + dir_y * beam_y + dir_z * beam_z;
+
+             if (cosLPrelim<0.91 || Elep<1) goodInteraction = false; else goodInteraction=true;}
+        }}
         recoHistVertexY->Fill(sr->common.ixn.pandora[nixn].vtx.y);
         recoHistVertexX->Fill(sr->common.ixn.pandora[nixn].vtx.x);
         recoHistVertexZ->Fill(sr->common.ixn.pandora[nixn].vtx.z);
@@ -544,15 +580,8 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
           goodIntNum++;
         else
           badIntNum++;
-        }
-        else badIntNum++;
-        if (/*abs(abs(sr->common.ixn.pandora[nixn].vtx.x)-33)<1 || */ abs(
-              sr->common.ixn.pandora[nixn].vtx.x) > 59 ||
-          abs(sr->common.ixn.pandora[nixn].vtx.x) < 5 ||
-          abs(sr->common.ixn.pandora[nixn].vtx.y) > 57 ||
-          abs(sr->common.ixn.pandora[nixn].vtx.z) < 5 ||
-          abs(sr->common.ixn.pandora[nixn].vtx.z) > 59.5)
-        continue;
+
+
 
         trueInteractionIndex.push_back(biggestMatchIndex);
 
@@ -574,23 +603,19 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
       int trackMultExit = 0;
       int minervaTracks = 0;
       int minervaThrough = 0;
+      int mx2IntCandidate=-9;
+      int mx2IdxCandidate=-9;
       for (long unsigned npart = 0;
            npart < sr->common.ixn.pandora[nixn].part.pandora.size();
            npart++) { // loop over particles
-        //if (!sr->common.ixn.pandora[nixn].part.pandora[npart].primary)
-          //continue;
-        if (std::isnan(sr->common.ixn.pandora[nixn].part.pandora[npart].start.z) || std::isinf(sr->common.ixn.pandora[nixn].part.pandora[npart].start.z))
-            continue;
-        if (std::isnan(sr->common.ixn.pandora[nixn].part.pandora[npart].end.z) || std::isinf(sr->common.ixn.pandora[nixn].part.pandora[npart].end.z))
-            continue;
+      //  if (!sr->common.ixn.pandora[nixn].part.pandora[npart].primary)
+      //    continue;
         int pdg = sr->common.ixn.pandora[nixn].part.pandora[npart].pdg;
         // Loop over primary tracks
-        if (abs(pdg)!=-2 || abs(pdg) == 2212 || abs(pdg) == 13 || abs(pdg) == 211 ||
-            abs(pdg) == 321) {
+        if ((abs(pdg) != -2)) {
 
           const auto& start_pos = sr->common.ixn.pandora[nixn].part.pandora[npart].start;
           const auto& end_pos = sr->common.ixn.pandora[nixn].part.pandora[npart].end;
-
           double diffVertexdZ =
               abs(start_pos.z - sr->common.ixn.pandora[nixn].vtx.z);
           double diffVertexdX =
@@ -638,14 +663,16 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
               double deltaExtrapX = -999;
               double deltaExtrapXUS = -999;
               double dotProductFromCAF=-999;
+
         	 	for(int k=0; k<sr->nd.trkmatch.extrap.size(); k++){
                 if (sr->nd.trkmatch.extrap[k].larid.ixn!=nixn || sr->nd.trkmatch.extrap[k].larid.reco!=2) continue;
                     int index=sr->nd.trkmatch.extrap[k].larid.idx;
-                    if (sr->nd.lar.pandora[nixn].tracks[index].start.z!=sr->common.ixn.pandora[nixn].part.pandora[npart].start.z || sr->nd.lar.pandora[nixn].tracks[index].end.z!=sr->common.ixn.pandora[nixn].part.pandora[npart].end.z) continue;
-
+                    if (sr->nd.lar.pandora[nixn].tracks[index].start.z==sr->common.ixn.pandora[nixn].part.pandora[npart].start.z && sr->nd.lar.pandora[nixn].tracks[index].end.z==sr->common.ixn.pandora[nixn].part.pandora[npart].end.z){
+                   double dotProductTemp=abs(sr->nd.trkmatch.extrap[k].angdispl);
+                    if (dotProductTemp<0.99) continue;
                  int i=sr->nd.trkmatch.extrap[k].minervaid.ixn;
                  int j=sr->nd.trkmatch.extrap[k].minervaid.idx;
-                 double dotProductTemp=abs(sr->nd.trkmatch.extrap[k].angdispl);
+
 
                   double dir_z = sr->nd.minerva.ixn[i].tracks[j].dir.z;
                   double end_z = sr->nd.minerva.ixn[i].tracks[j].end.z;
@@ -683,12 +710,13 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
                     double diffExtrap =
                         TMath::Sqrt(TMath::Power(extrapY - start_y, 2));
 
-                    if (dotProductDS < dotProductTemp && end_z>endZMuonCand) {
-                        endZMuonCand=end_z;
+                    if (dotProductDS < dotProductTemp) {
                       dotProductDS = dotProductTemp;
                       deltaExtrapY = extrapY;
                       deltaExtrapX = extrapX;
-            
+                      endZTemp=end_z;
+                      mx2IntCandidate=i;
+                      mx2IdxCandidate=j;
                       dirZExiting = dirZ;
                       dirXExiting = dirX;
                       dirYExiting = dirY;
@@ -742,11 +770,15 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
                       maxTypeMinervaUS =
                           sr->nd.minerva.ixn[i].tracks[j].truth[0].type;
                     }
+                  }
                 }
               } // Minerva
               // See how good the best one was
               if (dotProductDS > maxDotProductDS) {
                 maxDotProductDS = dotProductDS;
+                mx2IntCandidateVector.push_back(mx2IntCandidate);
+                mx2IdxCandidateVector.push_back(mx2IdxCandidate);
+                ndlarTrkCandidateVector.push_back(npart);
                 maxEventPar = maxPartMinerva;
                 maxEventTyp = maxTypeMinerva;
                 maxEventIxn = maxIxnMinerva;
@@ -770,22 +802,55 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
           }   // primary of particle greater than 5
         }
       } // particles
-      
-      // If you got one matched to downstream Mx2, then it likely was the muon
-      if (/*minervaThrough<1  ||*/ maxDotProductDS < 0.99)
+     if (/*minervaThrough<1  ||*/ maxDotProductDS < 0.99 || mx2IntCandidateVector.size()==0)
         continue;
-      if (maxEventTyp==1){
+      // If you got one matched to downstream Mx2, then it likely was the muon
+      int muonIndex=-1; double muonCandidateZ=-170;
+      for (int k=0; k<mx2IntCandidateVector.size(); k++){
+            int i=mx2IntCandidateVector.at(k); int j=mx2IdxCandidateVector.at(k); 
+            double end_z = sr->nd.minerva.ixn[i].tracks[j].end.z;
+            if (end_z>muonCandidateZ){ muonIndex=k; muonCandidateZ=end_z;}
+
+            }
+     // Calculate muon direction based on distance
+      int npart=ndlarTrkCandidateVector.at(muonIndex);
+      const auto& start_pos = sr->common.ixn.pandora[nixn].part.pandora[npart].start;
+      const auto& end_pos = sr->common.ixn.pandora[nixn].part.pandora[npart].end;
+      if (mcOnly==1){
+                      int i=mx2IntCandidateVector.at(muonIndex); int j=mx2IdxCandidateVector.at(muonIndex); 
+                      int  ixnMinerva=sr->nd.minerva.ixn[i].tracks[j].truth[0].ixn;
+                         int       partMinerva =
+                          sr->nd.minerva.ixn[i].tracks[j].truth[0].part;
+                      int typeMinerva =
+                          sr->nd.minerva.ixn[i].tracks[j].truth[0].type;
+          if (typeMinerva==1){
         //std::cout<<sr->mc.nu[maxEventIxn].prim[maxEventPar].pdg<<std::endl;
-        if (abs(sr->mc.nu[maxEventIxn].prim[maxEventPar].pdg)==13) muons++;
-                if (abs(sr->mc.nu[maxEventIxn].prim[maxEventPar].pdg)==211) pions++;
+        if (abs(sr->mc.nu[ixnMinerva].prim[partMinerva].pdg)==13) muons++;
+                if (abs(sr->mc.nu[ixnMinerva].prim[partMinerva].pdg)==211) pions++;}
+         else{
+        if (abs(sr->mc.nu[ixnMinerva].sec[partMinerva].pdg)==13) muons++;
+                if (abs(sr->mc.nu[ixnMinerva].sec[partMinerva].pdg)==211) pions++;
+
+         }
           
       }
-      // Change the muon to make sure it is in the frame of the downward going beam
+
+      double dX = (end_pos.x - start_pos.x);
+      double dY = (end_pos.y - start_pos.y);
+      double dZ = (end_pos.z - start_pos.z);
+      double length = TMath::Sqrt(dX * dX + dY * dY + dZ * dZ);
+      double dirX = dX / length;
+      double dirY = dY / length;
+      double dirZ = dZ / length;
+      
       double cosLReco =
-          dirXExiting * beam_x + dirYExiting * beam_y + dirZExiting * beam_z;
+          dirX * beam_x + dirY * beam_y + dirZ * beam_z;
+      // If you got one matched to downstream Mx2, then it likely was the muon
+
+      // Change the muon to make sure it is in the frame of the downward going beam
+
       recoCosL->Fill(cosLReco);
-      recoVertex2D->Fill(sr->common.ixn.pandora[nixn].vtx.x,
-                         sr->common.ixn.pandora[nixn].vtx.z);
+
 
       goodEvents.push_back(n);
       double trueCosL = -999;
@@ -876,16 +941,12 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
              npart++) { // loop over particles
           // std::cout<<"Containment variable:
           // "<<sr->common.ixn.pandora[nixn].part.pandora[npart].contained<<std::endl;
-         // if (!sr->common.ixn.pandora[nixn].part.pandora[npart].primary)
-            //continue;
-         if (std::isnan(sr->common.ixn.pandora[nixn].part.pandora[npart].start.z) || std::isinf(sr->common.ixn.pandora[nixn].part.pandora[npart].start.z))
-            continue;
-        if (std::isnan(sr->common.ixn.pandora[nixn].part.pandora[npart].end.z) || std::isinf(sr->common.ixn.pandora[nixn].part.pandora[npart].end.z))
+          if (!sr->common.ixn.pandora[nixn].part.pandora[npart].primary)
             continue;
           int pdg = sr->common.ixn.pandora[nixn].part.pandora[npart].pdg;
 
           const auto& start_pos = sr->common.ixn.pandora[nixn].part.pandora[npart].start;
-          const auto& end_pos = sr->common.ixn.pandora[nixn].part.pandora[npart].end;
+         const auto& end_pos = sr->common.ixn.pandora[nixn].part.pandora[npart].end;
           double dX = (end_pos.x - start_pos.x);
           double dY = (end_pos.y - start_pos.y);
           double dZ = (end_pos.z - start_pos.z);
@@ -893,9 +954,9 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
           double dirX = dX / length;
           double dirY = dY / length;
           double dirZ = dZ / length;
-          const auto& lengthDist = length;
+          auto lengthDist = length;
           if (abs(pdg) == 22 || abs(pdg) == 11 || abs(pdg) == 111) {
-            const auto& truthSize =
+            auto truthSize =
                 sr->common.ixn.pandora[nixn].part.pandora[npart].truth.size();
             double maxPartTruthOverlap = 0;
 
@@ -940,9 +1001,9 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
                   backtracked =
                       sr->mc.nu[interactionNumber].prim[partNumber].pdg;
                   primaryTrkIndex.push_back(partNumber);
-                }//else
-               //   backtracked =
-               //       sr->mc.nu[interactionNumber].sec[partNumber].pdg;
+                } else
+                  backtracked =
+                      sr->mc.nu[interactionNumber].sec[partNumber].pdg;
                 correctShower = 0;
                 if (parType > 2)
                   correctShower = 3;
@@ -961,7 +1022,7 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
           int maxTypeNumber = -999;
           if ((abs(pdg) == 2212 || abs(pdg) == 13 || abs(pdg) == 211 ||
                abs(pdg) == 321)) {
-            const auto& truthSize =
+            auto truthSize =
                 sr->common.ixn.pandora[nixn].part.pandora[npart].truth.size();
             double maxPartTruthOverlap = 0;
             double diffVertexdZ =
@@ -1019,9 +1080,9 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
                 if (parType < 3)
                   backtracked =
                       sr->mc.nu[interactionNumber].prim[partNumber].pdg;
-                //else
-                 // backtracked =
-                  //    sr->mc.nu[interactionNumber].sec[partNumber].pdg;
+                else
+                  backtracked =
+                      sr->mc.nu[interactionNumber].sec[partNumber].pdg;
                 if (parType < 3) {
                   int pdgNumber = 0;
                   if (abs(pdg) == 13) {
@@ -1170,11 +1231,13 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
             if (goodInteraction) {
               trueBacktrackedCosL_zoomOut->Fill(trueCosL);
               trueBacktrackedCosL_unbinned->Fill(trueCosL);
-              if (trueCosL>0.9){trueBacktrackedCosL->Fill(trueCosL);
+              if (trueCosL<0.91)       recoVertex2D->Fill(sr->common.ixn.pandora[nixn].vtx.x,
+                         sr->common.ixn.pandora[nixn].vtx.z);
+              if (trueCosL>0.91){trueBacktrackedCosL->Fill(trueCosL);
               responseCosL->Fill(cosLReco, trueCosL);
             }}
             // Fill the response matrix for the track multiplicity
-            if (cosLReco > 0.98 && trueCosL > 0.98 &&
+            if (cosLReco > 0.9 && trueCosL > 0.9 &&
                 goodInteraction) { /*std::cout<<trackMult<<","<<trueMatchMult<<std::endl;*/
               responseMult->Fill(trackMult, trueMatchMult);
               backtrackTrueMult->Fill(trueMatchMult);
@@ -1183,7 +1246,7 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
           }
         }
         // Fill the stack histograms of the track multiplicity by truth info
-        if (cosLReco > 0.98 && (!goodInteraction || trueCosL < 0.98)) {
+        if (cosLReco > 0.9 && (!goodInteraction || trueCosL < 0.9)) {
           track_multBad->Fill(trackMult);
         }
         if (!goodInteraction && sr->mc.nu[biggestMatchIndex].id > 1E9) {
@@ -1195,10 +1258,10 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
           recoBacktrackPDGSec->Fill(sr->mc.nu[biggestMatchIndex].pdg);
         }
 
-        if (!goodInteraction || trueCosL < 0.9)
+        if (!goodInteraction || trueCosL < 0.91)
           badRecoCosL->Fill(cosLReco);
-        if (cosLReco > 0.98) {
-          if (goodInteraction && trueCosL > 0.98 &&
+        if (cosLReco > 0.9) {
+          if (goodInteraction && trueCosL > 0.9 &&
               sr->mc.nu[biggestMatchIndex].iscc) {
             track_multGood->Fill(trackMult);
             int cc = sr->mc.nu[biggestMatchIndex].iscc;
@@ -1234,13 +1297,13 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
         }
       }
       // Fill the reco information for track multiplicity
-      if (cosLReco > 0.98) {
+      if (cosLReco > 0.9) {
         track_mult->Fill(trackMult);
         part_mult->Fill(partMult);
       }
 
     } // end for interaction
-  } }  // end for spills
+  }}   // end for spills
   std::cout << "Total: " << recoCosL->GetEntries() << std::endl;
   std::cout << "All Interactions No Additional Selection: "
             << double(goodIntNum) / trueCosL->GetEntries() << ","
@@ -1249,10 +1312,10 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
             << double(goodIntInFidVol) / trueCosL->GetEntries() << ","
             << float(goodIntInFidVol) / float(goodIntInFidVol + badIntInFidVol) << "," << float(goodIntInFidVol + badIntInFidVol)
             << std::endl;
-  std::cout << "All events with MINERvA match: " << recoCosL->GetEntries()
+  std::cout << "All events with MINERvA match: " << (recoCosL->GetEntries()-badRecoCosL->GetEntries())
             << "/" << trueCosL->GetEntries() << ","
-            << trueBacktrackedCosL->GetEntries() / trueCosL->GetEntries() << ","
-            << trueBacktrackedCosL->GetEntries() / recoCosL->GetEntries()<< "," <<recoCosL->GetEntries()<< std::endl;
+            << (recoCosL->GetEntries()-badRecoCosL->GetEntries()) / trueCosL->GetEntries() << ","
+            << (recoCosL->GetEntries()-badRecoCosL->GetEntries())/recoCosL->GetEntries()<< "," <<recoCosL->GetEntries()<< std::endl;
   // Create output file and write your histograms
   TFile *caf_out_file = new TFile(output_rootfile.c_str(), "recreate");
   matchHistCosl->Write();
@@ -1315,25 +1378,25 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
 
   truePionEWithRecoInt->Write();
   trueProtonEWithRecoInt->Write();
+  trueEnu->Write();
 
 
 
+  auto protonKEEff = new TEfficiency(*selProtonE, *trueProtonEWithRecoInt);
+  auto pionKEEff = new TEfficiency(*selPionE, *truePionEWithRecoInt);
 
-  const auto& protonKEEff = new TEfficiency(*selProtonE, *trueProtonEWithRecoInt);
-  const auto& pionKEEff = new TEfficiency(*selPionE, *truePionEWithRecoInt);
+  auto protonDirX = new TEfficiency(*selProtonDirX, *trueProtonWithRecoIntDirX);
+  auto protonDirY = new TEfficiency(*selProtonDirY, *trueProtonWithRecoIntDirY);
+  auto protonDirZ = new TEfficiency(*selProtonDirZ, *trueProtonWithRecoIntDirZ);
 
-  const auto& protonDirX = new TEfficiency(*selProtonDirX, *trueProtonWithRecoIntDirX);
-  const auto& protonDirY = new TEfficiency(*selProtonDirY, *trueProtonWithRecoIntDirY);
-  const auto& protonDirZ = new TEfficiency(*selProtonDirZ, *trueProtonWithRecoIntDirZ);
-
-  const auto& pionDirX = new TEfficiency(*selPionDirX, *truePionWithRecoIntDirX);
-  const auto& pionDirY = new TEfficiency(*selPionDirY, *truePionWithRecoIntDirY);
-  const auto& pionDirZ = new TEfficiency(*selPionDirZ, *truePionWithRecoIntDirZ);
+  auto pionDirX = new TEfficiency(*selPionDirX, *truePionWithRecoIntDirX);
+  auto pionDirY = new TEfficiency(*selPionDirY, *truePionWithRecoIntDirY);
+  auto pionDirZ = new TEfficiency(*selPionDirZ, *truePionWithRecoIntDirZ);
 
 
-  const auto& effTrkLen = new TEfficiency(*selTrkLen, *trueTrkLen);
-  const auto& effTrkLenQE = new TEfficiency(*selTrkLenQE, *trueTrkLenQE);
-  const auto& effTrkLenNonQE = new TEfficiency(*selTrkLenNonQE, *trueTrkLenNonQE);
+  auto effTrkLen = new TEfficiency(*selTrkLen, *trueTrkLen);
+  auto effTrkLenQE = new TEfficiency(*selTrkLenQE, *trueTrkLenQE);
+  auto effTrkLenNonQE = new TEfficiency(*selTrkLenNonQE, *trueTrkLenNonQE);
 
   effTrkLen->Write();
   effTrkLenQE->Write();
@@ -1366,6 +1429,7 @@ int caf_plotter(std::string input_file_list, std::string output_rootfile,
   totalPOT->Write();
   caf_out_file->Close();
   std::cout<<"Total number of neutrinos in Ar (and Fid. Vol.): "<<totalNuAr<<","<<totalNuArFidVol<<std::endl;
+  std::cout<<"Muon vs. Pions vs. other: "<<muons<<","<<pions<<","<<recoCosL->GetEntries()-pions-muons<<std::endl;
   return 1;
 }
 
