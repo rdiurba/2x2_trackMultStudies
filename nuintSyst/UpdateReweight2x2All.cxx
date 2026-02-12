@@ -174,6 +174,7 @@ int main(int argc, char const *argv[]) {
    Double_t* totWeight;
   printf("@@ Writting Header\n");
   int pids=0;
+  int index=0;
   for(systtools::paramId_t pid : resp_helper.GetParameters()) {
     pids++;
     systtools::SystParamHeader const &hdr = resp_helper.GetHeader(pid);
@@ -192,7 +193,17 @@ int main(int argc, char const *argv[]) {
     sys_weights[pid] = new Double_t[srglobal.wgts.params.back().nshifts];
 
     std::fill_n(sys_weights[pid], srglobal.wgts.params.back().nshifts, 1.0);
-    syst_weights_tree->Branch(hdr.prettyName.c_str(), sys_weights[pid], Form("%s[%d]/D", hdr.prettyName.c_str(), srglobal.wgts.params.back().nshifts));
+
+    std::cout<<hdr.prettyName.c_str()<<std::endl;
+    if (hdr.prettyName=="FSIReweight"){
+    index++;
+    if (index==1)    syst_weights_tree->Branch(Form("FSIReweight_hN"), sys_weights[pid], Form("FSIReweight_hN[%d]/D", srglobal.wgts.params.back().nshifts));
+    if (index==2)    syst_weights_tree->Branch(Form("FSIReweight_INCL"), sys_weights[pid], Form("FSIReweight_INCL[%d]/D", srglobal.wgts.params.back().nshifts));
+    if (index==3)    syst_weights_tree->Branch(Form("FSIReweight_G4BC"), sys_weights[pid], Form("FSIReweight_G4BC[%d]/D", srglobal.wgts.params.back().nshifts));
+
+
+    }
+    else syst_weights_tree->Branch(hdr.prettyName.c_str(), sys_weights[pid], Form("%s[%d]/D", hdr.prettyName.c_str(), srglobal.wgts.params.back().nshifts));
     if (pids==1){
          nshifts=srglobal.wgts.params.back().nshifts;
          totWeight= new Double_t[srglobal.wgts.params.back().nshifts];
@@ -211,7 +222,7 @@ int main(int argc, char const *argv[]) {
 
   size_t Nmax = std::min(NToRead + cliopts::NSkip, NEvs);
 
-  printf("Reading events from entry %ld to %ld\n", cliopts::NSkip, Nmax);
+
 
 
 
@@ -276,12 +287,22 @@ int main(int argc, char const *argv[]) {
 
       // UPDATE RECORD HERE
       // E.g., sr->mc.nu[i_nu].E = <updated value>
+        int j=0;
         for (auto it = sys_weights.begin(); it != sys_weights.end(); ++it) {
         Double_t* value = it->second;
+        if (srglobal.wgts.params.at(j).name.find("FSIReweight") != std::string::npos) {
+            j=j+1;
+        continue;  // skip this entry
+    }
+
+        //std::cout<<srglobal.wgts.params.at(j).name<<std::endl;
+
+        //std::cout<<srglobal.wgts.params.at(j).name<<std::endl;
         for (int i=0; i<nshifts; i++){
         if (value[i]<100 && value[i]>0.01)
         totWeight[i]=value[i]*totWeight[i];
             }
+        j++;
         }
 
 
