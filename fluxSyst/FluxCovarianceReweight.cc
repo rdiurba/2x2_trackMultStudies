@@ -30,6 +30,7 @@ bool FluxCovarianceReweight::LoadBinning(const char* binfile)
         b.pdg = pdg;
         b.elo = elo;
         b.ehi = ehi;
+        b.isRHC = isRHC;
         fBins.push_back(b);
     }
 
@@ -42,37 +43,205 @@ bool FluxCovarianceReweight::LoadBinning(const char* binfile)
 // =====================================================
 bool FluxCovarianceReweight::LoadCovariance()
 {
+
     TFile* f = TFile::Open("numiFluxSyst.root", "READ");
     if (!f || f->IsZombie()) return false;
+    TH2D* h=nullptr;
+    f->GetObject("hcov_hadProd_abs", h);
+    TH1D* hflux_fhc_nue=nullptr;
+    TH1D* hflux_fhc_nuebar=nullptr;
+    TH1D* hflux_fhc_numu=nullptr;
+    TH1D* hflux_fhc_numubar=nullptr;    
+    
+    TH1D* hflux_rhc_nue=nullptr;
+    TH1D* hflux_rhc_nuebar=nullptr;
+    TH1D* hflux_rhc_numu=nullptr;
+    TH1D* hflux_rhc_numubar=nullptr;
+    f->GetObject("hflux_fhc_nue_ppfx_corrected", hflux_fhc_nue);
+    f->GetObject("hflux_fhc_nuebar_ppfx_corrected", hflux_fhc_nuebar);
+    f->GetObject("hflux_fhc_numu_ppfx_corrected", hflux_fhc_numu);
+    f->GetObject("hflux_fhc_numubar_ppfx_corrected", hflux_fhc_numubar);
 
-    TH2D* h = dynamic_cast<TH2D*>(f->Get("covariance_matrices/hadron/total/hcov_total"));
+    f->GetObject("hflux_rhc_nue_ppfx_corrected", hflux_rhc_nue);
+    f->GetObject("hflux_rhc_nuebar_ppfx_corrected", hflux_rhc_nuebar);
+    f->GetObject("hflux_rhc_numu_ppfx_corrected", hflux_rhc_numu);
+    f->GetObject("hflux_rhc_numubar_ppfx_corrected", hflux_rhc_numubar);
 
+    LoadBinning("flux_covariance_binning_NuMI_GeV.txt");
 
-    if (!h) return false;
+    LoadFluxHistograms(
+      hflux_fhc_nue,
+      hflux_fhc_nuebar,
+      hflux_fhc_numu,
+      hflux_fhc_numubar,
+      hflux_rhc_nue,
+      hflux_rhc_nuebar,
+      hflux_rhc_numu,
+      hflux_rhc_numubar
+    );
 
-    int n = h->GetNbinsX();
+    if (!h) {
+        std::cerr << "ERROR: could not find hcov_total_abs\n";
+        return false;
+    }
+
+    const int n = h->GetNbinsX();
+    std::cout<<fBins.size()<<","<<n<<std::endl;
     if ((int)fBins.size() != n) {
         std::cerr << "ERROR: binning size does not match covariance\n";
         return false;
     }
 
+    if (fNominalFlux.GetNrows() != n) {
+        std::cerr << "ERROR: nominal flux not loaded before covariance\n";
+        return false;
+    }
+
     fCov.ResizeTo(n, n);
-    for (int i = 0; i < n; ++i)
-        for (int j = 0; j < n; ++j)
-            fCov(i,j) = h->GetBinContent(i+1, j+1);
 
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
 
+            const double cov_abs = h->GetBinContent(i+1, j+1);
+
+            const double phi_i = fNominalFlux[i];
+            const double phi_j = fNominalFlux[j];
+
+            if (phi_i > 0.0 && phi_j > 0.0) {
+                fCov(i,j) = cov_abs / (phi_i * phi_j);
+            } else {
+                fCov(i,j) = 0.0;
+            }
+        }
+    }
 
     return true;
 }
+bool FluxCovarianceReweight::LoadCombinedCovariance()
+{
+    // Load hadron production covariance (FHC + RHC)
+    TFile* f = TFile::Open("numiFluxSystFull.root", "READ");
+    if (!f || f->IsZombie()) {
+        std::cerr << "ERROR: could not open numiFluxSyst.root\n";
+        return false;
+    }
+    
+    TH2D* h_hadprod = nullptr;
+    f->GetObject("hcov_hadProd_abs", h_hadprod);
+    if (!h_hadprod) {
+        std::cerr << "ERROR: could not find hcov_total_abs\n";
+        return false;
+    }
+    
 
+    
+    TH2D* h_beamfocus = nullptr;
+    f->GetObject("hcov_beamFocus_abs", h_beamfocus);
+    if (!h_beamfocus) {
+        std::cerr << "ERROR: could not find cov_beam_focusing_rhc\n";
+        return false;
+    }
+    
+    // Load flux histograms
+    TH1D* hflux_fhc_nue=nullptr;
+    TH1D* hflux_fhc_nuebar=nullptr;
+    TH1D* hflux_fhc_numu=nullptr;
+    TH1D* hflux_fhc_numubar=nullptr;    
+    
+    TH1D* hflux_rhc_nue=nullptr;
+    TH1D* hflux_rhc_nuebar=nullptr;
+    TH1D* hflux_rhc_numu=nullptr;
+    TH1D* hflux_rhc_numubar=nullptr;
+    f->GetObject("hflux_fhc_nue_ppfx_corrected", hflux_fhc_nue);
+    f->GetObject("hflux_fhc_nuebar_ppfx_corrected", hflux_fhc_nuebar);
+    f->GetObject("hflux_fhc_numu_ppfx_corrected", hflux_fhc_numu);
+    f->GetObject("hflux_fhc_numubar_ppfx_corrected", hflux_fhc_numubar);
+
+    f->GetObject("hflux_rhc_nue_ppfx_corrected", hflux_rhc_nue);
+    f->GetObject("hflux_rhc_nuebar_ppfx_corrected", hflux_rhc_nuebar);
+    f->GetObject("hflux_rhc_numu_ppfx_corrected", hflux_rhc_numu);
+    f->GetObject("hflux_rhc_numubar_ppfx_corrected", hflux_rhc_numubar);
+
+    
+    // Load binning and flux
+    LoadBinning("flux_covariance_binning_NuMI_GeV.txt");
+    LoadFluxHistograms(
+        hflux_fhc_nue,
+        hflux_fhc_nuebar,
+        hflux_fhc_numu,
+        hflux_fhc_numubar,
+        hflux_rhc_nue,
+        hflux_rhc_nuebar,
+        hflux_rhc_numu,
+        hflux_rhc_numubar
+    );
+    
+    const int n = h_hadprod->GetNbinsX();
+    std::cout << "Total bins: " << fBins.size() << ", Covariance size: " << n << std::endl;
+    
+    if ((int)fBins.size() != n) {
+        std::cerr << "ERROR: binning size does not match covariance\n";
+        return false;
+    }
+    
+    if (fNominalFlux.GetNrows() != n) {
+        std::cerr << "ERROR: nominal flux not loaded before covariance\n";
+        return false;
+    }
+    
+    // Check beam focusing covariance size (should be 314 bins for RHC)
+    const int n_rhc = h_beamfocus->GetNbinsX();
+    const int n_fhc = n - n_rhc;  // First half is FHC
+    
+    if (n_rhc * 2 != n) {
+        std::cerr << "WARNING: Expected beam focusing bins (" << n_rhc 
+                  << ") to be half of total (" << n << ")\n";
+    }
+    
+    std::cout << "FHC bins: " << n_fhc << ", RHC bins: " << n_rhc << std::endl;
+    
+    // Resize and fill combined covariance
+    fCov.ResizeTo(n, n);
+    
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            // Start with hadron production covariance
+            double cov_abs = h_hadprod->GetBinContent(i+1, j+1);
+            
+            // Add beam focusing contribution for RHC bins only
+            // RHC bins are in the second half: [n_fhc, n)
+            if (i >= n_fhc && j >= n_fhc) {
+                int i_rhc = i - n_fhc;  // 0-indexed RHC bin
+                int j_rhc = j - n_fhc;
+                cov_abs += h_beamfocus->GetBinContent(i_rhc+1, j_rhc+1);
+            }
+            
+            // Convert to fractional covariance
+            const double phi_i = fNominalFlux[i];
+            const double phi_j = fNominalFlux[j];
+            
+            if (phi_i > 0.0 && phi_j > 0.0) {
+                fCov(i, j) = cov_abs / (phi_i * phi_j);
+            } else {
+                fCov(i, j) = 0.0;
+            }
+        }
+    }
+    
+    f->Close();
+
+    
+    std::cout << "Successfully loaded and combined covariances\n";
+    return true;
+}
 // =====================================================
 // Generate correlated throws
 // =====================================================
 bool FluxCovarianceReweight::GenerateThrows(int nThrows, int seed)
 {
+    LoadCombinedCovariance(); 
     TRandom3 rng(seed);
-    AddDiagonalEpsilon();
+    //AddDiagonalEpsilon();
     TDecompChol chol(fCov);
     if (!chol.Decompose()) {
         std::cerr << "ERROR: Cholesky failed\n";
@@ -103,6 +272,13 @@ bool FluxCovarianceReweight::GenerateThrows(int nThrows, int seed)
     std::cout << "Generated " << nThrows << " throws\n";
     ComputeIntegratedFluxes();
 
+    TMatrixD test=(TMatrixD) ReconstructCovarianceFromThrows();
+
+    for (int i = 100; i < n; ++i){
+    //std::cout<<i<<","<<std::sqrt(fCov(i,i))<<std::endl;
+
+    }
+
     return true;
 }
 
@@ -112,7 +288,7 @@ bool FluxCovarianceReweight::GenerateThrows(int nThrows, int seed)
 int FluxCovarianceReweight::FindBinIndex(int pdg, double Enu) const
 {
     for (size_t i = 0; i < fBins.size(); ++i)
-        if (fBins[i].Contains(pdg, Enu))
+        if (fBins[i].Contains(pdg, Enu,1))
             return i;
 
     return -1;
@@ -188,7 +364,7 @@ bool FluxCovarianceReweight::GenerateThrows2(int nThrows, int seed)
     }
        ComputeIntegratedFluxes();
 
-    std::cout << "Generated " << nThrows << " throws using eigen decomposition\n";
+    //std::cout << "Generated " << nThrows << " throws using eigen decomposition\n";
     return true;
 }
 const TVectorD& FluxCovarianceReweight::GetAllWeights(int pdg,
@@ -256,52 +432,104 @@ void FluxCovarianceReweight::FillAllThrowsForBin(int binIndex,
             out[ithrow] = fThrows[ithrow](binIndex);
     }
 }
+TMatrixD
+FluxCovarianceReweight::ReconstructCovarianceFromThrows() const
+{
+    const int nUniv = fThrows.size();
+    const int nBins = fThrows[0].GetNrows();
 
+    TMatrixD covEmp(nBins, nBins);
+    covEmp.Zero();
 
-std::vector<double> FluxCovarianceReweight::BuildFluxBinWidthVector(
-    TH1D* h_nue,
-    TH1D* h_nuebar,
-    TH1D* h_numu,
-    TH1D* h_numubar
+    // Compute mean weight per bin (should be ~1)
+    std::vector<double> mean(nBins, 0.0);
+
+    for (int u = 0; u < nUniv; ++u) {
+        for (int i = 0; i < nBins; ++i) {
+            mean[i] += fThrows[u](i);
+        }
+    }
+
+    for (int i = 0; i < nBins; ++i)
+        mean[i] /= nUniv;
+
+    // Build covariance
+    for (int u = 0; u < nUniv; ++u) {
+        for (int i = 0; i < nBins; ++i) {
+            const double di = fThrows[u](i) - mean[i];
+            for (int j = 0; j < nBins; ++j) {
+                const double dj = fThrows[u](j) - mean[j];
+                covEmp(i,j) += di * dj;
+            }
+        }
+    }
+
+    covEmp *= (1.0 / (nUniv - 1));
+
+    return covEmp;
+}
+std::vector<double>
+FluxCovarianceReweight::GetRelativeUncertaintyFromCovariance() const
+{
+    const int nBins = fCov.GetNrows();
+    std::vector<double> rel(nBins, 0.0);
+
+    for (int i = 0; i < nBins; ++i) {
+        if (fNominalFlux[i] > 0.0 && fCov(i,i) > 0.0) {
+            rel[i] = std::sqrt(fCov(i,i)); /// fNominalFlux[i];
+        } else {
+            rel[i] = 0.0;
+        }
+    }
+
+    for (int i = 507; i < nBins; ++i)     std::cout<<rel[i]<<std::endl;
+    return rel;
+}
+
+std::vector<double> FluxCovarianceReweight::BuildFluxBinCenterVector(
+    TH1D* h_fhc_nue,
+    TH1D* h_fhc_nuebar,
+    TH1D* h_fhc_numu,
+    TH1D* h_fhc_numubar,
+    TH1D* h_rhc_nue,
+    TH1D* h_rhc_nuebar,
+    TH1D* h_rhc_numu,
+    TH1D* h_rhc_numubar
 ) const {
     std::vector<double> w;
-    w.reserve(150);
+    w.reserve(628); // total bins
 
-    for (int i = 1; i <= h_nue->GetNbinsX(); ++i)
-        w.push_back(h_nue->GetBinWidth(i));
+    TH1D* hists[8] = {h_fhc_nue, h_fhc_nuebar, h_fhc_numu, h_fhc_numubar,
+                      h_rhc_nue, h_rhc_nuebar, h_rhc_numu, h_rhc_numubar};
 
-    for (int i = 1; i <= h_nuebar->GetNbinsX(); ++i)
-        w.push_back(h_nuebar->GetBinWidth(i));
-
-    for (int i = 1; i <= h_numu->GetNbinsX(); ++i)
-        w.push_back(h_numu->GetBinWidth(i));
-
-    for (int i = 1; i <= h_numubar->GetNbinsX(); ++i)
-        w.push_back(h_numubar->GetBinWidth(i));
+    for (int h = 0; h < 8; ++h) {
+        for (int i = 1; i <= hists[h]->GetNbinsX(); ++i)
+            w.push_back(hists[h]->GetBinCenter(i));
+    }
 
     return w;
 }
 
 TVectorD FluxCovarianceReweight::BuildNominalFluxVector(
-    TH1D* h_nue,
-    TH1D* h_nuebar,
-    TH1D* h_numu,
-    TH1D* h_numubar
-) const{
-    TVectorD fluxNom(150);
+    TH1D* h_fhc_nue,
+    TH1D* h_fhc_nuebar,
+    TH1D* h_fhc_numu,
+    TH1D* h_fhc_numubar,
+    TH1D* h_rhc_nue,
+    TH1D* h_rhc_nuebar,
+    TH1D* h_rhc_numu,
+    TH1D* h_rhc_numubar
+) const {
+    TVectorD fluxNom(628);
     int bin = 0;
 
-    for (int i = 1; i <= h_nue->GetNbinsX(); ++i)
-        fluxNom[bin++] = h_nue->GetBinContent(i);
+    TH1D* hists[8] = {h_fhc_nue, h_fhc_nuebar, h_fhc_numu, h_fhc_numubar,
+                      h_rhc_nue, h_rhc_nuebar, h_rhc_numu, h_rhc_numubar};
 
-    for (int i = 1; i <= h_nuebar->GetNbinsX(); ++i)
-        fluxNom[bin++] = h_nuebar->GetBinContent(i);
-
-    for (int i = 1; i <= h_numu->GetNbinsX(); ++i)
-        fluxNom[bin++] = h_numu->GetBinContent(i);
-
-    for (int i = 1; i <= h_numubar->GetNbinsX(); ++i)
-        fluxNom[bin++] = h_numubar->GetBinContent(i);
+    for (int h = 0; h < 8; ++h) {
+        for (int i = 1; i <= hists[h]->GetNbinsX(); ++i)
+            fluxNom[bin++] = hists[h]->GetBinContent(i);
+    }
 
     return fluxNom;
 }
@@ -312,61 +540,60 @@ double FluxCovarianceReweight::GetFluxWeight(
     return fThrows[ithrow](binIndex) / fNominalFlux[binIndex];
 }
 void FluxCovarianceReweight::LoadFluxHistograms(
-    TH1D* h_nue,
-    TH1D* h_nuebar,
-    TH1D* h_numu,
-    TH1D* h_numubar
+    TH1D* h_fhc_nue,
+    TH1D* h_fhc_nuebar,
+    TH1D* h_fhc_numu,
+    TH1D* h_fhc_numubar,
+    TH1D* h_rhc_nue,
+    TH1D* h_rhc_nuebar,
+    TH1D* h_rhc_numu,
+    TH1D* h_rhc_numubar
 ) {
-    const int NBINS = 150;
+    const int NBINS = 628;
 
     fNominalFlux.ResizeTo(NBINS);
-    fFluxBinWidth.clear();
-    fFluxBinWidth.reserve(NBINS);
+    fFluxBinCenter.clear();
+    fFluxBinCenter.reserve(NBINS);
+
+    TH1D* hists[8] = {h_fhc_nue, h_fhc_nuebar, h_fhc_numu, h_fhc_numubar,
+                      h_rhc_nue, h_rhc_nuebar, h_rhc_numu, h_rhc_numubar};
 
     int bin = 0;
-
-    // nue (25)
-    for (int i = 1; i <= h_nue->GetNbinsX(); ++i, ++bin) {
-        fNominalFlux[bin] = h_nue->GetBinContent(i);
-        fFluxBinWidth.push_back(h_nue->GetBinWidth(i));
-    }
-
-    // nuebar (25)
-    for (int i = 1; i <= h_nuebar->GetNbinsX(); ++i, ++bin) {
-        fNominalFlux[bin] = h_nuebar->GetBinContent(i);
-        fFluxBinWidth.push_back(h_nuebar->GetBinWidth(i));
-    }
-
-    // numu (50)
-    for (int i = 1; i <= h_numu->GetNbinsX(); ++i, ++bin) {
-        fNominalFlux[bin] = h_numu->GetBinContent(i);
-        fFluxBinWidth.push_back(h_numu->GetBinWidth(i));
-    }
-
-    // numubar (50)
-    for (int i = 1; i <= h_numubar->GetNbinsX(); ++i, ++bin) {
-        fNominalFlux[bin] = h_numubar->GetBinContent(i);
-        fFluxBinWidth.push_back(h_numubar->GetBinWidth(i));
+    for (int h = 0; h < 8; ++h) {
+        for (int i = 1; i <= hists[h]->GetNbinsX(); ++i, ++bin) {
+            fNominalFlux[bin] = hists[h]->GetBinContent(i);
+            fFluxBinCenter.push_back(hists[h]->GetBinCenter(i));
+        }
     }
 }
+
+
+
 void FluxCovarianceReweight::ComputeIntegratedFluxes()
 {
     const int nUniv = (int)fThrows.size();
     const int nBins = fThrows[1].GetNrows();
-
+    //GetRelativeUncertaintyFromCovariance();
+    
     // Nominal
     fIntegratedFluxNominal = 0.0;
-    for (int b = 50; b < nBins; ++b)
+    for (int b = 386; b < nBins; ++b){
+            if (fFluxBinCenter[b]<2) continue;
         fIntegratedFluxNominal +=
-            fNominalFlux[b];// * fFluxBinWidth[b];
+            fNominalFlux[b];// * fFluxBinCenter[b];
 
+
+    }
     // Universes
     fIntegratedFluxThrows.assign(nUniv, 0.0);
 
     for (int u = 0; u < nUniv; ++u) {
-        for (int b = 50; b < nBins; ++b) {
+        for (int b = 386; b < nBins; ++b) {
+            if (fFluxBinCenter[b]<2) continue;
+          //  if (b>506 && b<527){  
+           //     continue;}
             fIntegratedFluxThrows[u] +=
-                fThrows[u](b)* fNominalFlux[b];// * fFluxBinWidth[b];
+                fThrows[u](b)* fNominalFlux[b];// * fFluxBinCenter[b];
         }
     }
 }
